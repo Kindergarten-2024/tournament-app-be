@@ -6,6 +6,8 @@ import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.AuthService;
 import com.opap.tournamentapp.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
@@ -20,10 +22,12 @@ public class LoginController {
 
     private final AuthService authService;
     private final UserService userService;
+    private final String frontendUrl;
 
-    public LoginController(AuthService authService, UserService userService){
+    public LoginController(AuthService authService, UserService userService,@Value("${frontendUrl:http://localhost:3000}") String frontendUrl ){
         this.authService=authService;
         this.userService = userService;
+        this.frontendUrl = frontendUrl;
     }
 
     /**
@@ -60,7 +64,7 @@ public class LoginController {
      */
     @GetMapping("/oauth/login/success")
     public String loginSuccessRedirect() {
-        return "redirect:http://localhost:3000/auth/callback";
+        return "redirect:" + frontendUrl + "/auth/callback";
     }
 
     /**
