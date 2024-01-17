@@ -1,7 +1,8 @@
 package com.opap.tournamentapp.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.opap.tournamentapp.service.UserService;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,7 +21,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.opap.tournamentapp.service.UserService;
 
 @Configuration
 @EnableWebSecurity
@@ -32,10 +34,10 @@ public class SecurityConfig {
         this.userService=userService;
     }
     @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl ) throws Exception {
         http
                 .csrf().disable()
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
                 .authorizeHttpRequests()
                 .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**", "/admin/**","/ws-message/**").permitAll()
                 .anyRequest().authenticated()
@@ -45,10 +47,10 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+   // @Bean
+    CorsConfigurationSource corsConfigurationSource(String frontendUrl) {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of( frontendUrl));
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
