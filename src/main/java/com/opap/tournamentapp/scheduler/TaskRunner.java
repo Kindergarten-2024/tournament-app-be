@@ -19,10 +19,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 @Service
 @EnableScheduling
 public class TaskRunner {
+
+    private static final Logger logger = LogManager.getLogger(TaskRunner.class);
 
     private final QuestionRepository questionRepository;
     private final KafkaProducer kafkaProducer; //TODO : ask autowired or init list??
@@ -69,7 +74,7 @@ public class TaskRunner {
         //changed scheduleWithFixedDelay from scheduleWithFixedDelay(this::executeTask, 5000);
         //because scheduleWithFixedDelay(Runnable task, long delay) has been deprecated
         //in favor of scheduleWithFixedDelay(Runnable task, Duration delay)
-        questionNumber=0;
+        questionNumber = 0;
         scheduledFuture = taskScheduler.scheduleWithFixedDelay(this::executeTask, Duration.ofSeconds(20));
     }
 
@@ -89,12 +94,15 @@ public class TaskRunner {
             List<Question> questions = questionRepository.findByDifficulty(difficulty);
             for (Question question : questions) {
                 if (question.getOptions().isEmpty() || question.getOptions() == null) {
-                    throw new IllegalArgumentException("No options for the question with ID: " + question.getQuestionId());
+                    String errorMessage = "No options for the question with ID: " + question.getQuestionId();
+                    logger.error(errorMessage);
+                    throw new IllegalArgumentException(errorMessage);
                 }
             }
             allQuestions.addAll(questions);
         }
         if (count > allQuestions.size()) {
+            logger.error("Not enough questions for the specified difficulty levels.");
             throw new IllegalArgumentException("Not enough questions for the specified difficulty levels.");
         }
         Collections.shuffle(allQuestions);
@@ -115,7 +123,7 @@ public class TaskRunner {
      *
      */
     private void executeTask() {
-        System.out.println("Scheduler Started");
+        logger.info("Scheduler Started");
         try {
             if (!questionList.isEmpty()) {
                 Question currentQuestion = questionList.get(0);
@@ -134,8 +142,9 @@ public class TaskRunner {
                     updateRoundsAndTime();
                 }
             }
-        }catch ( JsonProcessingException e) {
-            System.out.println("Task interrupted " + e.getMessage());
+        } catch ( JsonProcessingException e) {
+
+            logger.error("Task interrupted " + e.getMessage(), e);
         }
 
     }
@@ -162,7 +171,7 @@ public class TaskRunner {
      */
     private void stopScheduler() {
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
-            System.out.println("Scheduler Stopped");
+            logger.info("Scheduler Stopped");
             scheduledFuture.cancel(true);
             isSchedulerActive = false;
         }

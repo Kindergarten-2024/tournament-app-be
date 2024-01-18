@@ -2,13 +2,16 @@ package com.opap.tournamentapp.dto;
 
 public class SharedData {
     private boolean sharedFlag;
-    private static SharedData instance = new SharedData();
+    private static SharedData instance;
 
     private SharedData() {
         sharedFlag = false;
     }
 
     public static SharedData getInstance() {
+        if (instance == null) {
+            instance = new SharedData();
+        }
         return instance;
     }
 
