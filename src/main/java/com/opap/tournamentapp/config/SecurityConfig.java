@@ -23,11 +23,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.service.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
+    private static final Logger logger = LogManager.getLogger(SecurityConfig.class);
     private final UserService userService;
 
     public SecurityConfig(UserService userService){
@@ -76,11 +78,12 @@ public class SecurityConfig {
             String username = user.getAttribute("login");
             String avatarUrl = user.getAttribute("avatar_url");
 
-            System.out.println("Fullname: " + fullname + " Username: " + username);
+            logger.info("Fullname: " + fullname + " Username: " + username);
 
             try {
                 userService.loginUser(fullname, username, avatarUrl);
             } catch (JsonProcessingException e) {
+                logger.error(e.getMessage(),e);
                 throw new RuntimeException(e);
             }
 

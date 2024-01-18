@@ -4,9 +4,12 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import org.springframework.stereotype.Service;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Service
 public class FirebaseMessagingService {
+    private static final Logger logger = LogManager.getLogger(FirebaseMessagingService.class);
 
     public void sendNotification(String deviceToken, String title, String body) throws FirebaseMessagingException {
         Message message = Message.builder()
@@ -17,9 +20,9 @@ public class FirebaseMessagingService {
 
         try {
             String response = FirebaseMessaging.getInstance().send(message);
-            System.out.println("Successfully sent message: " + response);
+            logger.info("Successfully sent message: " + response);
         } catch (Exception e) {
-            System.out.println("Error when sending notification: " + e.getMessage());
+            logger.info("Error when sending notification: " + e.getMessage());
         }
     }
 }

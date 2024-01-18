@@ -14,12 +14,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
 @Controller
 public class LoginController {
-
+    private static final Logger logger = LogManager.getLogger(LoginController.class);
     private final AuthService authService;
     private final UserService userService;
     private final String frontendUrl;
@@ -81,7 +83,7 @@ public class LoginController {
         if (token != null) {
 
             Map<String, Object> user = authService.userMap(token);
-            System.out.println(user);
+            logger.info(user);
 
             CheckLoginResponseDTO response = new CheckLoginResponseDTO(true, user);
             return ResponseEntity.ok(response);

@@ -11,10 +11,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Service
 public class QuestionService {
-
+    private static final Logger logger = LogManager.getLogger(QuestionService.class);
     private final QuestionRepository questionRepository;
 
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -77,7 +79,7 @@ public class QuestionService {
             List<User> descPlayerList = userService.findAllByDescScore();
             if (descPlayerList != null && !descPlayerList.isEmpty()) {
                 simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
-                System.out.println("Sending to /leaderboard after");
+                logger.info("Sending to /leaderboard after");
             }
         }
     }
