@@ -2,19 +2,20 @@ package com.opap.tournamentapp.scheduler;
 
 import com.opap.tournamentapp.dto.RegistrationsTimeDTO;
 import com.opap.tournamentapp.dto.TextMessageDTO;
+import com.opap.tournamentapp.model.RegistrationsTime;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Service
 public class RegistrationsTimeTask {
+    private static final Logger logger=LogManager.getLogger(RegistrationsTime.class);
 
     final RegistrationsTimeService registrationsTimeService;
 
@@ -54,7 +55,7 @@ public class RegistrationsTimeTask {
                 try {
                     taskRunner.getRandomQuestionsByMultiDifficulties(4, Collections.singletonList(registrationsTimeService.getRegistrationRounds()));
                 } catch (IllegalArgumentException e) {
-                    System.out.println(e.getMessage());
+                    logger.error(e.getMessage(),e);
                 }
                 firstTime = false;
             }
