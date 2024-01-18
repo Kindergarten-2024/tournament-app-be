@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepo
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -23,6 +24,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.service.UserService;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,18 +38,30 @@ public class SecurityConfig {
         this.userService=userService;
     }
     @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl ) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl)
+            throws Exception {
         http
                 .csrf().disable()
-                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
-                .authorizeHttpRequests()
-                .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**", "/admin/**","/ws-message/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .oauth2Login()
-                .defaultSuccessUrl("/oauth/login/success", true);
+                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl))) // Using frontendUrl
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(new AntPathRequestMatcher("/oauth/login/google")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/oauth/login/github")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/loggedin/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/ws-message/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth -> oauth
+                        .defaultSuccessUrl("/oauth/login/success", true)
+                )
+                .headers(headers -> headers
+                        .frameOptions().sameOrigin() // Allow frames for the H2 console
+                );
+
         return http.build();
     }
+
 
    // @Bean
     CorsConfigurationSource corsConfigurationSource(String frontendUrl) {
