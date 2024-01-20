@@ -1,0 +1,5 @@
+steps:
+- name: '3.9.6-eclipse-temurin-17'
+  args: ['install', '-Dmaven.test.skip=true']
+- name: '3.9.6-eclipse-temurin-17'
+  args: ['jib:build']
