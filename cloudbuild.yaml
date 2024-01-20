@@ -1,5 +1,5 @@
 steps:
-- name: '3.9.6-eclipse-temurin-17'
+- name: 'gcr.io/cloud-builders/mvn:3.9.1'
   args: ['install', '-Dmaven.test.skip=true']
-- name: '3.9.6-eclipse-temurin-17'
+- name: 'gcr.io/cloud-builders/mvn:3.9.1'
   args: ['jib:build']
