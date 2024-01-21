@@ -21,7 +21,7 @@ import java.util.Map;
 
 @Controller
 public class LoginController {
-    private static final Logger logger = LogManager.getLogger(LoginController.class);
+    private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
     private final AuthService authService;
     private final UserService userService;
     private final String frontendUrl;
@@ -83,7 +83,7 @@ public class LoginController {
         if (token != null) {
 
             Map<String, Object> user = authService.userMap(token);
-            logger.info(user);
+            LOGGER.info(user);
 
             CheckLoginResponseDTO response = new CheckLoginResponseDTO(true, user);
             return ResponseEntity.ok(response);
