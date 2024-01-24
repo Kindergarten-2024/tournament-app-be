@@ -66,7 +66,7 @@ public class LoginController {
      */
     @GetMapping("/oauth/login/success")
     public String loginSuccessRedirect() {
-        return "redirect:" + frontendUrl + "/auth/callback";
+        return "redirect:" + frontendUrl;
     }
 
     /**
