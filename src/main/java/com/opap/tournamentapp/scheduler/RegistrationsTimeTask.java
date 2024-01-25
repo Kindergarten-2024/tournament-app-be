@@ -35,7 +35,7 @@ public class RegistrationsTimeTask {
 
     private boolean firstTime = true;
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 60000)
     public void checkIfRegistrationsTimePassed() {
         registrationsTimeService.registrationsTimeInit();
         if (registrationsTimeService.getRegistrationsEndTime().isAfter(LocalDateTime.now())) {
@@ -44,6 +44,7 @@ public class RegistrationsTimeTask {
             registrationsTimeDTO.setTimerOn(true);
             registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
             simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
+            logger.info("The local date time now is " + LocalDateTime.now() + " Not supposed to send questions yet ");
         }
 
         else {
@@ -54,6 +55,7 @@ public class RegistrationsTimeTask {
             if (firstTime && registrationsTimeService.getRegistrationRounds() <=2) {
                 try {
                     taskRunner.getRandomQuestionsByMultiDifficulties(4, Collections.singletonList(registrationsTimeService.getRegistrationRounds()));
+                    logger.info("The local date time now is " + LocalDateTime.now() + " supposed to send questions!!!!!!!!!! ");
                 } catch (IllegalArgumentException e) {
                     logger.error(e.getMessage(),e);
                 }
