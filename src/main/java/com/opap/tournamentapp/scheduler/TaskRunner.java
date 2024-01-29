@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +44,8 @@ public class TaskRunner {
     private final RegistrationsTimeService registrationsTimeService;
 
     final UserService userService;
+
+    private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
 
     /**
      * Initializes a new instance of {@code TaskRunner}.
@@ -127,10 +131,9 @@ public class TaskRunner {
         try {
             if (!questionList.isEmpty()) {
                 Question currentQuestion = questionList.get(0);
-
-                LocalDateTime currentDateTime = LocalDateTime.now();
+                ZonedDateTime eetTime=ZonedDateTime.now(eetTimeZone);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDateTime = currentDateTime.format(formatter);
+                String formattedDateTime = eetTime.format(formatter);
                 questionNumber++;
                 QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), formattedDateTime,questionNumber);
                 kafkaProducer.sendQuestion("questions", dto);
