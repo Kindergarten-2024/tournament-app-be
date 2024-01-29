@@ -9,6 +9,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.Collections;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +28,8 @@ public class RegistrationsTimeTask {
 
     private final TaskRunner taskRunner;
 
+    private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
+
     RegistrationsTimeDTO registrationsTimeDTO = new RegistrationsTimeDTO();
 
     public RegistrationsTimeTask(RegistrationsTimeService registrationsTimeService, SimpMessagingTemplate simpMessagingTemplate, TaskRunner taskRunner) {
@@ -38,12 +43,14 @@ public class RegistrationsTimeTask {
     @Scheduled(fixedRate = 1000)
     public void checkIfRegistrationsTimePassed() {
         registrationsTimeService.registrationsTimeInit();
-        if (registrationsTimeService.getRegistrationsEndTime().isAfter(LocalDateTime.now())) {
+        ZonedDateTime eetTime=ZonedDateTime.now(eetTimeZone);
+        if (registrationsTimeService.getRegistrationsEndTime().isAfter(ChronoLocalDateTime.from(eetTime))) {
             registrationsTimeService.setIsRegistrationsOpen(true);
             firstTime = true;
             registrationsTimeDTO.setTimerOn(true);
             registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
             simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
+            logger.info("The local date time now is " + ChronoLocalDateTime.from(eetTime) + " Not supposed to send questions yet ");
         }
 
         else {
@@ -51,6 +58,7 @@ public class RegistrationsTimeTask {
             registrationsTimeDTO.setTimerOn(false);
             registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
             simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
+            logger.info("The local date time now is " + ChronoLocalDateTime.from(eetTime) + " supposed to send questions!!!!!!!!!! ");
             if (firstTime && registrationsTimeService.getRegistrationRounds() <=2) {
                 try {
                     taskRunner.getRandomQuestionsByMultiDifficulties(4, Collections.singletonList(registrationsTimeService.getRegistrationRounds()));
