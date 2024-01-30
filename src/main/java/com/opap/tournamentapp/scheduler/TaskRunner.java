@@ -125,7 +125,11 @@ public class TaskRunner {
     private void executeTask() {
         logger.info("Scheduler Started");
         try {
-            if (!questionList.isEmpty()) {
+            if (questionList.isEmpty()) {
+                stopScheduler();
+                updateRoundsAndTime();
+            }
+            else {
                 Question currentQuestion = questionList.get(0);
 
                 LocalDateTime currentDateTime = LocalDateTime.now();
@@ -135,12 +139,6 @@ public class TaskRunner {
                 QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), formattedDateTime,questionNumber);
                 kafkaProducer.sendQuestion("questions", dto);
                 questionList.remove(0);
-
-                if (questionList.isEmpty()) {
-                    // Stop the scheduler if the list is empty
-                    stopScheduler();
-                    updateRoundsAndTime();
-                }
             }
         } catch ( JsonProcessingException e) {
 
