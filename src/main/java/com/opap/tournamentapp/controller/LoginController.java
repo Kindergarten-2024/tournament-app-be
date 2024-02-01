@@ -6,10 +6,12 @@ import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.AuthService;
 import com.opap.tournamentapp.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -80,16 +82,21 @@ public class LoginController {
      */
     @GetMapping("/loggedin")
     public ResponseEntity<CheckLoginResponseDTO> loggedIn(OAuth2AuthenticationToken token) {
-        if (token != null) {
+        CacheControl cacheControl = CacheControl.noStore().mustRevalidate();
 
+        if (token != null) {
             Map<String, Object> user = authService.userMap(token);
             LOGGER.info(user);
 
             CheckLoginResponseDTO response = new CheckLoginResponseDTO(true, user);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .cacheControl(cacheControl)
+                    .body(response);
         } else {
             CheckLoginResponseDTO response2 = new CheckLoginResponseDTO(false, null);
-            return ResponseEntity.ok(response2);
+            return ResponseEntity.ok()
+                    .cacheControl(cacheControl)
+                    .body(response2);
         }
     }
 
