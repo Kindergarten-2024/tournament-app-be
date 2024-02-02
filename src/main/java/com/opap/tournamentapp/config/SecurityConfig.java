@@ -74,36 +74,40 @@ public class SecurityConfig {
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
         return urlBasedCorsConfigurationSource;
     }
-
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(WebClient rest) {
         DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
         return request -> {
             OAuth2User user = delegate.loadUser(request);
-            if (!"github".equals(request.getClientRegistration().getRegistrationId())) {
-                return user;
+            String registrationId = request.getClientRegistration().getRegistrationId();
+            OAuth2AuthorizedClient client = new OAuth2AuthorizedClient(request.getClientRegistration(), user.getName(), request.getAccessToken());
+            String fullname, username, avatarUrl;
+
+            if ("github".equals(registrationId)) {
+                fullname = user.getAttribute("name");
+                username = user.getAttribute("login");
+                avatarUrl = user.getAttribute("avatar_url");
+            } else if ("google".equals(registrationId)) {
+                fullname = user.getAttribute("name");
+                username = user.getAttribute("email"); // Assuming you use email as username for Google
+                avatarUrl = user.getAttribute("picture");
+            } else {
+                throw new IllegalArgumentException("Unsupported OAuth2 provider: " + registrationId);
             }
-
-
-            OAuth2AuthorizedClient client = new OAuth2AuthorizedClient
-                    (request.getClientRegistration(), user.getName(), request.getAccessToken());
-
-            String fullname = user.getAttribute("name");
-            String username = user.getAttribute("login");
-            String avatarUrl = user.getAttribute("avatar_url");
 
             logger.info("Fullname: " + fullname + " Username: " + username);
 
             try {
                 userService.loginUser(fullname, username, avatarUrl);
             } catch (JsonProcessingException e) {
-                logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
                 throw new RuntimeException(e);
             }
 
-//            if (RequestContextHolder.currentRequestAttributes().getSessionId() != null) {
-//                System.out.println("Session Id: " + RequestContextHolder.currentRequestAttributes().getSessionId());
-//            }
+            // Uncomment if you need to log the session ID
+            // if (RequestContextHolder.currentRequestAttributes().getSessionId() != null) {
+            //     System.out.println("Session Id: " + RequestContextHolder.currentRequestAttributes().getSessionId());
+            // }
 
             return user;
         };
