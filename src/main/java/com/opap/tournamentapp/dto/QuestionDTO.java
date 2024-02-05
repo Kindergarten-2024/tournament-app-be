@@ -19,7 +19,7 @@ public class QuestionDTO {
 
     private int questionNumber;
 
-    public QuestionDTO(String question, List<String> options, Long id, String time,int questionNumber) {
+    public QuestionDTO(String question, List<String> options, Long id, String time, int questionNumber) {
         this.question = question;
         this.options = options;
         this.id=id;

@@ -5,6 +5,7 @@ import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.repository.UserRepository;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -47,6 +48,15 @@ public class UserService {
             producer.sendMessage("logs",textMessageDTO);
             userRepository.save(user.get());
         }
+    }
+
+    public int findPlayerPosition(User user) {
+        List<User> leaderboard = userRepository.findAllByRegisteredTrueOrderByScoreDesc();
+        return leaderboard.indexOf(user) + 1;
+    }
+
+    public int findPlayerScore(User user) {
+        return user.getScore();
     }
 
     // LeaderBoard
