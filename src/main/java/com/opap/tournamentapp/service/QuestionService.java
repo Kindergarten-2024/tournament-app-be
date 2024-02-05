@@ -7,6 +7,10 @@ import com.opap.tournamentapp.repository.QuestionRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +26,8 @@ public class QuestionService {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     private final UserService userService;
+
+    private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
     public QuestionService(QuestionRepository questionRepository, SimpMessagingTemplate simpMessagingTemplate, UserService userService){
         this.questionRepository=questionRepository;
         this.simpMessagingTemplate = simpMessagingTemplate;
@@ -37,6 +43,37 @@ public class QuestionService {
         List<Question> allQuestions = questionRepository.findAll();
         Collections.shuffle(allQuestions);
         return allQuestions.subList(0, count);
+    }
+
+    public void updateCurrentQuestion(int questionNumber) {
+       Question currentQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
+       currentQuestion.setCurrentQuestion(true);
+       questionRepository.save(currentQuestion);
+
+       questionNumber = questionNumber - 1;
+       if (questionNumber > 0) {
+           Question previousQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
+           previousQuestion.setCurrentQuestion(false);
+           questionRepository.save(previousQuestion);
+
+       }
+    }
+
+    public Question getQuestionByOrder(int order) {
+        Question question = questionRepository.findQuestionByQuestionOrder(order);
+
+        ZonedDateTime eetTime = ZonedDateTime.now(eetTimeZone);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = eetTime.format(formatter);
+        question.setTimeSent(formattedDateTime);
+        questionRepository.save(question);
+
+        return question;
+    }
+
+    public Question getCurrentQuestion() {
+        Optional<Question> optionalQuestion = questionRepository.findByCurrentQuestionTrue();
+        return optionalQuestion.orElse(null);
     }
 
     // Create a new question
@@ -60,9 +97,10 @@ public class QuestionService {
         if (question.isPresent()) {
             Question existingQuestion = question.get();
             existingQuestion.setQuestion(questionDetails.getQuestion());
-            existingQuestion.setDifficulty(questionDetails.getDifficulty());
+            existingQuestion.setCurrentQuestion(questionDetails.getCurrentQuestion());
             existingQuestion.setOptions(questionDetails.getOptions());
             existingQuestion.setCorrectAnswer(questionDetails.getCorrectAnswer());
+            existingQuestion.setQuestionOrder(questionDetails.getQuestionOrder());
             return questionRepository.save(existingQuestion);
         }
         return null;

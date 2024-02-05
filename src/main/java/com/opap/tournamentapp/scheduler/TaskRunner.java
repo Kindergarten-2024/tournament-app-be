@@ -5,6 +5,7 @@ import com.opap.tournamentapp.dto.QuestionDTO;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.Question;
 import com.opap.tournamentapp.repository.QuestionRepository;
+import com.opap.tournamentapp.service.QuestionService;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
 import com.opap.tournamentapp.service.UserService;
 import org.springframework.scheduling.TaskScheduler;
@@ -32,10 +33,11 @@ public class TaskRunner {
     private static final Logger logger = LogManager.getLogger(TaskRunner.class);
 
     private final QuestionRepository questionRepository;
+    private final QuestionService questionService;
     private final KafkaProducer kafkaProducer; //TODO : ask autowired or init list??
     private  List<Question> questionList = new ArrayList<>();
 
-    private int questionNumber;
+    private int questionNumber = 0;
 
     private boolean isSchedulerActive = false;
     private ScheduledFuture<?> scheduledFuture;
@@ -56,8 +58,9 @@ public class TaskRunner {
      * and made ready to use within this constructor.
      * </p>
      */
-    public TaskRunner(QuestionRepository questionRepository, KafkaProducer kafkaProducer, UserService userService, RegistrationsTimeService registrationsTimeService) {
+    public TaskRunner(QuestionRepository questionRepository, QuestionService questionService, KafkaProducer kafkaProducer, UserService userService, RegistrationsTimeService registrationsTimeService) {
         this.questionRepository = questionRepository;
+        this.questionService = questionService;
         this.userService=userService;
         this.kafkaProducer = kafkaProducer;
         this.registrationsTimeService = registrationsTimeService;
@@ -70,16 +73,17 @@ public class TaskRunner {
      * <h2> start's scheduler </h2>
      *
      * <p>start's the scheduler when it needs to in</p>
-     * @see #getRandomQuestionsByMultiDifficulties
+//     * @see #getRandomQuestionsByMultiDifficulties
      *
      *
      */
-    private void startScheduler() {
+    public void startScheduler(int round) {
         //changed scheduleWithFixedDelay from scheduleWithFixedDelay(this::executeTask, 5000);
         //because scheduleWithFixedDelay(Runnable task, long delay) has been deprecated
         //in favor of scheduleWithFixedDelay(Runnable task, Duration delay)
-        questionNumber = 0;
-        scheduledFuture = taskScheduler.scheduleWithFixedDelay(this::executeTask, Duration.ofSeconds(20));
+//        scheduledFuture = taskScheduler.scheduleWithFixedDelay(this::executeTask(round), Duration.ofSeconds(20));
+        scheduledFuture = taskScheduler.scheduleWithFixedDelay(() -> executeTask(round), Duration.ofSeconds(20));
+
     }
 
     /**
@@ -92,30 +96,30 @@ public class TaskRunner {
      * @param difficulties What level of difficulties u want those questions to be from
      *
      */
-    public void getRandomQuestionsByMultiDifficulties(int count, List<Integer> difficulties) {
-        List<Question> allQuestions = new ArrayList<>();
-        for (int difficulty : difficulties) {
-            List<Question> questions = questionRepository.findByDifficulty(difficulty);
-            for (Question question : questions) {
-                if (question.getOptions().isEmpty() || question.getOptions() == null) {
-                    String errorMessage = "No options for the question with ID: " + question.getQuestionId();
-                    logger.error(errorMessage);
-                    throw new IllegalArgumentException(errorMessage);
-                }
-            }
-            allQuestions.addAll(questions);
-        }
-        if (count > allQuestions.size()) {
-            logger.error("Not enough questions for the specified difficulty levels.");
-            throw new IllegalArgumentException("Not enough questions for the specified difficulty levels.");
-        }
-        Collections.shuffle(allQuestions);
-        questionList=allQuestions.subList(0,count);
-        if (!isSchedulerActive) {
-            isSchedulerActive = true;
-            startScheduler();
-        }
-    }
+//    public void getRandomQuestionsByMultiDifficulties(int count, List<Integer> difficulties) {
+//        List<Question> allQuestions = new ArrayList<>();
+//        for (int difficulty : difficulties) {
+//            List<Question> questions = questionRepository.findByDifficulty(difficulty);
+//            for (Question question : questions) {
+//                if (question.getOptions().isEmpty() || question.getOptions() == null) {
+//                    String errorMessage = "No options for the question with ID: " + question.getQuestionId();
+//                    logger.error(errorMessage);
+//                    throw new IllegalArgumentException(errorMessage);
+//                }
+//            }
+//            allQuestions.addAll(questions);
+//        }
+//        if (count > allQuestions.size()) {
+//            logger.error("Not enough questions for the specified difficulty levels.");
+//            throw new IllegalArgumentException("Not enough questions for the specified difficulty levels.");
+//        }
+//        Collections.shuffle(allQuestions);
+//        questionList=allQuestions.subList(0,count);
+//        if (!isSchedulerActive) {
+//            isSchedulerActive = true;
+//            startScheduler();
+//        }
+//    }
 
     /**
      * <h2> ExecuteTask </h2>
@@ -126,25 +130,36 @@ public class TaskRunner {
      *
      *
      */
-    private void executeTask() {
-        logger.info("Scheduler Started");
+    private void executeTask(int round) {
+        logger.info("Task Executed");
         try {
-            if (questionList.isEmpty()) {
+            questionNumber++;
+
+            // int 5 for sending 4 questions in each round
+            if (questionNumber == (4 * round + 1) || questionNumber == 9) {
+                questionNumber--;
                 stopScheduler();
                 updateRoundsAndTime();
             }
-            else {
-                Question currentQuestion = questionList.get(0);
-                ZonedDateTime eetTime=ZonedDateTime.now(eetTimeZone);
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDateTime = eetTime.format(formatter);
-                questionNumber++;
-                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), formattedDateTime,questionNumber);
-                kafkaProducer.sendQuestion("questions", dto);
-                questionList.remove(0);
-            }
-        } catch ( JsonProcessingException e) {
 
+            Question currentQuestion = questionService.getQuestionByOrder(questionNumber);
+
+            if (currentQuestion != null) {
+                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), questionNumber);
+                kafkaProducer.sendQuestion("questions", dto);
+                questionService.updateCurrentQuestion(questionNumber);
+            }
+//            else {
+//                Question currentQuestion = questionList.get(0);
+//                ZonedDateTime eetTime=ZonedDateTime.now(eetTimeZone);
+//                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//                String formattedDateTime = eetTime.format(formatter);
+//                questionNumber++;
+//                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), formattedDateTime,questionNumber);
+//                kafkaProducer.sendQuestion("questions", dto);
+//                questionList.remove(0);
+//            }
+        } catch (JsonProcessingException e) {
             logger.error("Task interrupted " + e.getMessage(), e);
         }
 
@@ -166,7 +181,7 @@ public class TaskRunner {
      * <h2> stop's scheduler </h2>
      *
      * <p>stop's the scheduler if needed in</p>
-     * @see #executeTask()
+//     * @see #executeTask()
      *
      *
      */

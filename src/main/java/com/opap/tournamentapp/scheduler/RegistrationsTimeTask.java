@@ -50,7 +50,7 @@ public class RegistrationsTimeTask {
             registrationsTimeDTO.setTimerOn(true);
             registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
             simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
-            logger.info("The local date time now is " + ChronoLocalDateTime.from(eetTime) + " Not supposed to send questions yet ");
+//            logger.info("The local date time now is " + ChronoLocalDateTime.from(eetTime) + " Not supposed to send questions yet ");
         }
 
         else {
@@ -58,10 +58,11 @@ public class RegistrationsTimeTask {
             registrationsTimeDTO.setTimerOn(false);
             registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
             simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
-            logger.info("The local date time now is " + ChronoLocalDateTime.from(eetTime) + " supposed to send questions!!!!!!!!!! ");
+//            logger.info("The local date time now is " + ChronoLocalDateTime.from(eetTime) + " supposed to send questions!!!!!!!!!! ");
             if (firstTime && registrationsTimeService.getRegistrationRounds() <=2) {
                 try {
-                    taskRunner.getRandomQuestionsByMultiDifficulties(4, Collections.singletonList(registrationsTimeService.getRegistrationRounds()));
+//                    taskRunner.getRandomQuestionsByMultiDifficulties(4, Collections.singletonList(registrationsTimeService.getRegistrationRounds()));
+                    taskRunner.startScheduler(registrationsTimeService.getRegistrationRounds());
                 } catch (IllegalArgumentException e) {
                     logger.error(e.getMessage(),e);
                 }
