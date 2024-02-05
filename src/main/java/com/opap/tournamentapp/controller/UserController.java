@@ -18,18 +18,6 @@ public class UserController {
 
     }
 
-    /**
-     * <h2> Leaderboard </h2>
-     *
-     * Return a list of all users in descending score order.
-     *
-     * @return A list of Users.
-     */
-    @GetMapping("/leaderboard")
-    public List<User> getLeaderboard() {
-        return userService.findAllByDescScore();
-    }
-
     // Create a new user
     @PostMapping
     public User createUser(@RequestBody User user) {

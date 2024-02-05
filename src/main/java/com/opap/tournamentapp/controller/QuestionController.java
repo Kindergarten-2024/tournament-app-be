@@ -4,6 +4,7 @@ import com.opap.tournamentapp.dto.QuestionDTO;
 import com.opap.tournamentapp.model.Question;
 import com.opap.tournamentapp.scheduler.TaskRunner;
 import com.opap.tournamentapp.service.QuestionService;
+import com.opap.tournamentapp.service.RegistrationsTimeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +21,12 @@ public class QuestionController {
 
     private final TaskRunner taskRunner;
 
-    public QuestionController(QuestionService questionService, TaskRunner taskRunner){
+    private final RegistrationsTimeService registrationsTimeService;
+
+    public QuestionController(QuestionService questionService, TaskRunner taskRunner, RegistrationsTimeService registrationsTimeService){
         this.questionService=questionService;
         this.taskRunner=taskRunner;
+        this.registrationsTimeService = registrationsTimeService;
     }
 //    /**
 //     * <h2> start round and Select Questions by Difficulties </h2>
@@ -47,12 +51,16 @@ public class QuestionController {
 
     @GetMapping("/get-current-question")
     public ResponseEntity<?> getCurrentQuestion() {
-        Question currentQuestion = questionService.getCurrentQuestion();
-        if (currentQuestion != null) {
-            QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), currentQuestion.getQuestionOrder());
-            return ResponseEntity.ok(dto);
+        if (!registrationsTimeService.isRegistrationsOpen()) {
+            Question currentQuestion = questionService.getCurrentQuestion();
+            if (currentQuestion != null) {
+                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), currentQuestion.getQuestionOrder());
+                return ResponseEntity.ok(dto);
+            }
+            return ResponseEntity.ok("No question available.");
+        } else {
+            return ResponseEntity.ok("Round not started yet.");
         }
-        return ResponseEntity.ok("No question available.");
     }
 
     // Create a new question
