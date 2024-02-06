@@ -77,7 +77,7 @@ public class SecurityConfig {
     }
 
 
-   // @Bean
+    // @Bean
     CorsConfigurationSource corsConfigurationSource(String frontendUrl) {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of( frontendUrl));
