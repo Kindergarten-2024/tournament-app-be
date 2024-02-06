@@ -136,7 +136,11 @@ public class TaskRunner {
             questionNumber++;
 
             // int 5 for sending 4 questions in each round
-            if (questionNumber == (4 * round + 1) || questionNumber == 9) {
+            if (questionNumber == 11 && round == 1) {
+                questionNumber--;
+                stopScheduler();
+                updateRoundsAndTime();
+            } else if (questionNumber == 21 && round == 2) {
                 questionNumber--;
                 stopScheduler();
                 updateRoundsAndTime();
