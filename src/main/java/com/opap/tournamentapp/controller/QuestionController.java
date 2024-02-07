@@ -18,36 +18,12 @@ import java.util.Optional;
 public class QuestionController {
 
     private final QuestionService questionService;
-
-    private final TaskRunner taskRunner;
-
     private final RegistrationsTimeService registrationsTimeService;
 
-    public QuestionController(QuestionService questionService, TaskRunner taskRunner, RegistrationsTimeService registrationsTimeService){
+    public QuestionController(QuestionService questionService, RegistrationsTimeService registrationsTimeService){
         this.questionService=questionService;
-        this.taskRunner=taskRunner;
         this.registrationsTimeService = registrationsTimeService;
     }
-//    /**
-//     * <h2> start round and Select Questions by Difficulties </h2>
-//     *
-//     * Given the number of questions and the difficulties of them
-//     * return a mixed list.
-//     *
-//     * @param count The number of questions to return
-//     * @param difficulties The level of difficulties questions should have
-//     * @return A new ResponseEntity with a 200 (OK) status code and response body with the List of Questions,
-//     *         else a 400 (Bad Request) status code with an error message
-//     */
-//    @PostMapping("/start-round/{count}/{difficulties}")
-//    public ResponseEntity<String> getRandomQuestions(@PathVariable int count, @PathVariable List<Integer> difficulties) {
-//        try {
-//            taskRunner.getRandomQuestionsByMultiDifficulties(count, difficulties);
-//             return ResponseEntity.ok("ok");
-//        } catch (IllegalArgumentException e) {
-//             return ResponseEntity.badRequest().body("not ok");
-//        }
-//    }
 
     @GetMapping("/get-current-question")
     public ResponseEntity<?> getCurrentQuestion() {

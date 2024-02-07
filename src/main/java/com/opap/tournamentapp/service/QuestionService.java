@@ -8,10 +8,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,17 +32,6 @@ public class QuestionService {
         this.userService = userService;
     }
 
-    /**
-     *  Given a count integer (the number of questions to return)
-     *  return a shuffled list of questions.
-     */
-    @Deprecated
-    public List<Question> getRandomQuestions(int count) {
-        List<Question> allQuestions = questionRepository.findAll();
-        Collections.shuffle(allQuestions);
-        return allQuestions.subList(0, count);
-    }
-
     public void updateCurrentQuestion(int questionNumber) {
        Question currentQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
        currentQuestion.setCurrentQuestion(true);
@@ -53,7 +42,6 @@ public class QuestionService {
            Question previousQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
            previousQuestion.setCurrentQuestion(false);
            questionRepository.save(previousQuestion);
-
        }
     }
 

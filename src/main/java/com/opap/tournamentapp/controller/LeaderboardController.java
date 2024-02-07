@@ -14,7 +14,6 @@ import java.util.List;
 public class LeaderboardController {
 
     private final UserService userService;
-
     private final AuthService authService;
 
     public LeaderboardController(UserService userService, AuthService authService) {

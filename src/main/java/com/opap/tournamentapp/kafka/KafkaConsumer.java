@@ -21,12 +21,8 @@ public class KafkaConsumer {
 
     private static final Logger logger = LogManager.getLogger(KafkaConsumer.class);
     SimpMessagingTemplate simpMessagingTemplate;
-
     ObjectMapper objectMapper;
-
     private final UserService userService;
-
-
 
     public KafkaConsumer(SimpMessagingTemplate simpMessagingTemplate, ObjectMapper objectMapper, UserService userService) {
         this.simpMessagingTemplate = simpMessagingTemplate;
@@ -34,14 +30,12 @@ public class KafkaConsumer {
         this.userService = userService;
     }
 
-
     /**
      * <h2> Kafka listener at "questions" topic </h2>
      *
      * Listens to topic "questions" and consumes automatically whenever a question is produced by
      * QuestionService.getRandomQuestionsByMultiDifficulties() function.
      */
-    // hit POST http://localhost:8080/admin/questions/start-round/
     @KafkaListener(topics = "questions")
     public void listen(String record) throws JsonProcessingException {
         QuestionDTO questionDTO = objectMapper.readValue(record, QuestionDTO.class);
@@ -71,6 +65,7 @@ public class KafkaConsumer {
         simpMessagingTemplate.convertAndSend("/logs" , textMessageDTO);
         logger.info("Sending logs to frontend");
     }
+
     /**
      * <h2> Kafka listener at "lock" topic </h2>
      *
