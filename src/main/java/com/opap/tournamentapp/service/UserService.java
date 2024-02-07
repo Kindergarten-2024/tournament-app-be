@@ -5,7 +5,6 @@ import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.repository.UserRepository;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;

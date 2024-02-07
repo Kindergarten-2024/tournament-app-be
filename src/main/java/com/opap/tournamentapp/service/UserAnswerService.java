@@ -10,7 +10,6 @@ import com.opap.tournamentapp.repository.QuestionRepository;
 import com.opap.tournamentapp.repository.UserAnswerRepository;
 import com.opap.tournamentapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Text;
 
 import java.util.Objects;
 

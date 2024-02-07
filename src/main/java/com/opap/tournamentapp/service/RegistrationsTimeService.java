@@ -2,7 +2,6 @@ package com.opap.tournamentapp.service;
 
 import com.opap.tournamentapp.model.RegistrationsTime;
 import com.opap.tournamentapp.repository.RegistrationsTimeRepository;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
