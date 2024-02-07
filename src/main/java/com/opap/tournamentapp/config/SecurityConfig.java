@@ -35,45 +35,47 @@ public class SecurityConfig {
     public SecurityConfig(UserService userService){
         this.userService=userService;
     }
-    @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl)
-            throws Exception {
-        http
-                .csrf().disable()
-                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl))) // Using frontendUrl
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(new AntPathRequestMatcher("/oauth/login/google")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/oauth/login/github")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/loggedin/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/ws-message/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth -> oauth
-                        .defaultSuccessUrl("/oauth/login/success", true)
-                )
-                .headers(headers -> headers
-                        .frameOptions().sameOrigin() // Allow frames for the H2 console
-                );
 
-        return http.build();
-    }
-
+    // H2 config
 //    @Bean
-//    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl) throws Exception {
+//    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl)
+//            throws Exception {
 //        http
 //                .csrf().disable()
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
-//                .authorizeHttpRequests()
-//                .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**", "/admin/**","/ws-message/**").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .oauth2Login()
-//                .defaultSuccessUrl("/oauth/login/success", true);
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl))) // Using frontendUrl
+//                .authorizeHttpRequests(authz -> authz
+//                        .requestMatchers(new AntPathRequestMatcher("/oauth/login/google")).permitAll()
+//                        .requestMatchers(new AntPathRequestMatcher("/oauth/login/github")).permitAll()
+//                        .requestMatchers(new AntPathRequestMatcher("/loggedin/**")).permitAll()
+//                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).permitAll()
+//                        .requestMatchers(new AntPathRequestMatcher("/ws-message/**")).permitAll()
+//                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+//                        .anyRequest().authenticated()
+//                )
+//                .oauth2Login(oauth -> oauth
+//                        .defaultSuccessUrl("/oauth/login/success", true)
+//                )
+//                .headers(headers -> headers
+//                        .frameOptions().sameOrigin() // Allow frames for the H2 console
+//                );
+//
 //        return http.build();
 //    }
 
+    // PostgreSQL config
+    @Bean
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl) throws Exception {
+        http
+                .csrf().disable()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
+                .authorizeHttpRequests()
+                .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**", "/admin/**","/ws-message/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .oauth2Login()
+                .defaultSuccessUrl("/oauth/login/success", true);
+        return http.build();
+    }
 
     // @Bean
     CorsConfigurationSource corsConfigurationSource(String frontendUrl) {
@@ -115,12 +117,6 @@ public class SecurityConfig {
                 logger.error(e.getMessage(), e);
                 throw new RuntimeException(e);
             }
-
-            // Uncomment if you need to log the session ID
-            // if (RequestContextHolder.currentRequestAttributes().getSessionId() != null) {
-            //     System.out.println("Session Id: " + RequestContextHolder.currentRequestAttributes().getSessionId());
-            // }
-
             return user;
         };
     }
