@@ -2,7 +2,6 @@ package com.opap.tournamentapp.service;
 
 import com.opap.tournamentapp.model.RegistrationsTime;
 import com.opap.tournamentapp.repository.RegistrationsTimeRepository;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -46,7 +45,7 @@ public class RegistrationsTimeService {
     public void setRegistrationRoundsAndNextQuizStartTime(){
                 RegistrationsTime registrationsTime = registrationsTimeRepository.findFirstRecord();
                 registrationsTime.setTournamentRound(registrationsTime.getTournamentRound()+1);
-                registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(2));
+                registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(5));
                 registrationsTimeRepository.save(registrationsTime);
     }
 

@@ -4,17 +4,15 @@ import com.opap.tournamentapp.dto.RegistrationsTimeDTO;
 import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.model.RegistrationsTime;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.chrono.ChronoLocalDateTime;
-import java.util.Collections;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Service
 public class RegistrationsTimeTask {

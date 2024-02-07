@@ -7,13 +7,13 @@ import com.opap.tournamentapp.dto.SharedData;
 import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 @Component
