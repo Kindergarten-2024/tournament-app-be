@@ -1,6 +1,7 @@
 package com.opap.tournamentapp.dto;
 
 import java.util.List;
+
 /**
  * A class with  some attributes to load question in kafka
  */
@@ -10,6 +11,25 @@ public class QuestionDTO {
     private List<String> options;
     private Long id;
     private String time;
+
+
+    private String answer;
+
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+
+
+    private int questionNumber;
+
+
+
     public int getQuestionNumber() {
         return questionNumber;
     }
@@ -17,13 +37,14 @@ public class QuestionDTO {
         this.questionNumber = questionNumber;
     }
 
-    private int questionNumber;
 
-    public QuestionDTO(String question, List<String> options, Long id, String time, int questionNumber) {
+
+    public QuestionDTO(String question, List<String> options, Long id, String time,String answer,int questionNumber) {
         this.question = question;
         this.options = options;
         this.id=id;
         this.time=time;
+        this.answer = answer;
         this.questionNumber=questionNumber;
     }
     public QuestionDTO() {

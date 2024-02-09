@@ -1,6 +1,7 @@
 package com.opap.tournamentapp.controller;
 
 import com.opap.tournamentapp.dto.QuestionDTO;
+import com.opap.tournamentapp.encryption.EncryptionUtils;
 import com.opap.tournamentapp.model.Question;
 import com.opap.tournamentapp.scheduler.TaskRunner;
 import com.opap.tournamentapp.service.QuestionService;
@@ -26,11 +27,11 @@ public class QuestionController {
     }
 
     @GetMapping("/get-current-question")
-    public ResponseEntity<?> getCurrentQuestion() {
+    public ResponseEntity<?> getCurrentQuestion() throws Exception {
         if (!registrationsTimeService.isRegistrationsOpen()) {
             Question currentQuestion = questionService.getCurrentQuestion();
             if (currentQuestion != null) {
-                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), currentQuestion.getQuestionOrder());
+                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), currentQuestion.getQuestionOrder());
                 return ResponseEntity.ok(dto);
             }
             return ResponseEntity.ok("No question available.");

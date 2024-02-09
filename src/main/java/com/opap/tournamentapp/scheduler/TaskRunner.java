@@ -2,6 +2,7 @@ package com.opap.tournamentapp.scheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.dto.QuestionDTO;
+import com.opap.tournamentapp.encryption.EncryptionUtils;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.Question;
 import com.opap.tournamentapp.service.QuestionService;
@@ -86,12 +87,14 @@ public class TaskRunner {
             Question currentQuestion = questionService.getQuestionByOrder(questionNumber);
 
             if (currentQuestion != null) {
-                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), questionNumber);
+                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), questionNumber);
                 kafkaProducer.sendQuestion("questions", dto);
                 questionService.updateCurrentQuestion(questionNumber);
             }
         } catch (JsonProcessingException e) {
             logger.error("Task interrupted " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
