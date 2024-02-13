@@ -22,7 +22,7 @@ public class RegistrationsTimeService {
 
     public void registrationsTimeInit() {
                 if(registrationsTimeRepository.findFirstRecord() == null) {
-                    RegistrationsTime registrationsTime = new RegistrationsTime(LocalDateTime.of(2024,Month.FEBRUARY,10,17,0,0) ,true,1);
+                    RegistrationsTime registrationsTime = new RegistrationsTime(LocalDateTime.of(2024,Month.FEBRUARY,25,17,0,0) ,true,1);
                     registrationsTimeRepository.save(registrationsTime);
                 }
     }
