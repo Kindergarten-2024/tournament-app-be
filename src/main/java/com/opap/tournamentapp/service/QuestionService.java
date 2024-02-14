@@ -96,17 +96,6 @@ public class QuestionService {
      *  Given the message "questionEnded" from frontend
      *  Makes a list of users with DescScore and send it
      */
-    public void submitQuestionEnd(String message){
-        SharedData sharedData = SharedData.getInstance();
-        if(Objects.equals(message, "questionEnded") && sharedData.isTrue()) {
-            sharedData.makeFalse();
-            List<User> descPlayerList = userService.findAllByDescScore();
-            if (descPlayerList != null && !descPlayerList.isEmpty()) {
-                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
-                logger.info("Sending to /leaderboard after");
-            }
-        }
-    }
 
     // Delete all questions
     public void deleteAllQuestions() {

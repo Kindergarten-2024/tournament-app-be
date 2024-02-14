@@ -39,20 +39,11 @@ public class KafkaConsumer {
     @KafkaListener(topics = "questions")
     public void listen(String record) throws JsonProcessingException {
         QuestionDTO questionDTO = objectMapper.readValue(record, QuestionDTO.class);
-        sendLeaderboard(userService, simpMessagingTemplate);
         simpMessagingTemplate.convertAndSend("/questions" , questionDTO);
         SharedData sharedData = SharedData.getInstance();
         sharedData.makeTrue();
         logger.info("Sending the question");
     }
-    public static void sendLeaderboard(UserService userService, SimpMessagingTemplate simpMessagingTemplate) {
-        List<User> descPlayerList = userService.findAllByDescScore();
-        if (descPlayerList != null && !descPlayerList.isEmpty()) {
-            simpMessagingTemplate.convertAndSend("/leaderboardBefore", descPlayerList);
-            logger.info("Sending to /leaderboard before");
-        }
-    }
-
     /**
      * <h2> Kafka listener at "logs" topic </h2>
      *

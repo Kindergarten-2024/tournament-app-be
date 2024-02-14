@@ -2,6 +2,7 @@ package com.opap.tournamentapp.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.dto.TextMessageDTO;
+import com.opap.tournamentapp.kafka.KafkaConsumer;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.Question;
 import com.opap.tournamentapp.model.User;
@@ -9,8 +10,12 @@ import com.opap.tournamentapp.model.UserAnswer;
 import com.opap.tournamentapp.repository.QuestionRepository;
 import com.opap.tournamentapp.repository.UserAnswerRepository;
 import com.opap.tournamentapp.repository.UserRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -24,17 +29,21 @@ public class UserAnswerService {
 
     private final UserRepository userRepository;
 
+    private static final Logger logger= LogManager.getLogger(KafkaConsumer.class);
+
     private final KafkaProducer producer;
 
     TextMessageDTO textMessageDTO = new TextMessageDTO();
+    SimpMessagingTemplate simpMessagingTemplate;
 
 
-    public UserAnswerService(UserAnswerRepository userAnswerRepository, QuestionRepository questionRepository, UserService userService, UserRepository userRepository,KafkaProducer producer) {
+    public UserAnswerService(SimpMessagingTemplate simpMessagingTemplate,UserAnswerRepository userAnswerRepository, QuestionRepository questionRepository, UserService userService, UserRepository userRepository,KafkaProducer producer) {
         this.userAnswerRepository = userAnswerRepository;
         this.questionRepository = questionRepository;
         this.userService = userService;
         this.userRepository = userRepository;
         this.producer=producer;
+        this.simpMessagingTemplate=simpMessagingTemplate;
     }
 
     /**
@@ -70,6 +79,11 @@ public class UserAnswerService {
             // Save to answer database and update user's score
             userAnswerRepository.save(userAnswer);
             updateUserScore(userId, isCorrect);
+            List<User> descPlayerList = userService.findAllByDescScore();
+            if (descPlayerList != null && !descPlayerList.isEmpty()) {
+                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+                logger.info("Sending to /leaderboard");
+            }
         }
     }
 

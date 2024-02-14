@@ -47,9 +47,4 @@ public class WebSocketTextController {
         userAnswerService.submitAnswer(id, textMessageDTO.getQuestionId(), textMessageDTO.getAnswer());
     }
 
-    //notification that question ended
-    @MessageMapping("/questionEnded")
-    public void receiveMessage(@Payload TextMessageDTO textMessageDTO) throws JsonProcessingException {
-        questionService.submitQuestionEnd(textMessageDTO.getMessage());
-    }
 }
