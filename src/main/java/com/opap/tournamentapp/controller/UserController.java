@@ -2,14 +2,23 @@ package com.opap.tournamentapp.controller;
 
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/admin/users")
 public class UserController {
+
+
+    @GetMapping("/time/now")
+    public ResponseEntity<?> fetchCurrentTime() {
+        Instant now = Instant.now();
+        return ResponseEntity.ok(now.toString());
+    }
 
     private final UserService userService;
 
