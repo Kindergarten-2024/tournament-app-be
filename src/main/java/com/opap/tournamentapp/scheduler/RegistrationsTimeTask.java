@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.chrono.ChronoLocalDateTime;
+import java.time.chrono.ChronoZonedDateTime;
 
 @Service
 public class RegistrationsTimeTask {
@@ -31,12 +32,38 @@ public class RegistrationsTimeTask {
     }
 
     private boolean firstTime = true;
+//
+//    @Scheduled(fixedRate = 1000)
+//    public void checkIfRegistrationsTimePassed() {
+//        registrationsTimeService.registrationsTimeInit();
+//        ZonedDateTime eetTime=ZonedDateTime.now(eetTimeZone);
+//        if (registrationsTimeService.getRegistrationsEndTime().isAfter((ChronoZonedDateTime<?>) ChronoLocalDateTime.from(eetTime))) {
+//            registrationsTimeService.setIsRegistrationsOpen(true);
+//            firstTime = true;
+//            registrationsTimeDTO.setTimerOn(true);
+//            registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
+//            simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
+//        } else {
+//            registrationsTimeService.setIsRegistrationsOpen(false);
+//            registrationsTimeDTO.setTimerOn(false);
+//            registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
+//            simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
+//            if (firstTime && registrationsTimeService.getRegistrationRounds() <=2) {
+//                try {
+//                    taskRunner.startScheduler(registrationsTimeService.getRegistrationRounds());
+//                } catch (IllegalArgumentException e) {
+//                    logger.error(e.getMessage(),e);
+//                }
+//                firstTime = false;
+//            }
+//        }
+//    }
 
     @Scheduled(fixedRate = 1000)
     public void checkIfRegistrationsTimePassed() {
         registrationsTimeService.registrationsTimeInit();
-        ZonedDateTime eetTime=ZonedDateTime.now(eetTimeZone);
-        if (registrationsTimeService.getRegistrationsEndTime().isAfter(ChronoLocalDateTime.from(eetTime))) {
+        ZonedDateTime eetTime = ZonedDateTime.now(eetTimeZone);
+        if (registrationsTimeService.getRegistrationsEndTime().isAfter(eetTime)) {
             registrationsTimeService.setIsRegistrationsOpen(true);
             firstTime = true;
             registrationsTimeDTO.setTimerOn(true);
@@ -47,14 +74,15 @@ public class RegistrationsTimeTask {
             registrationsTimeDTO.setTimerOn(false);
             registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
             simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
-            if (firstTime && registrationsTimeService.getRegistrationRounds() <=2) {
+            if (firstTime && registrationsTimeService.getRegistrationRounds() <= 2) {
                 try {
                     taskRunner.startScheduler(registrationsTimeService.getRegistrationRounds());
                 } catch (IllegalArgumentException e) {
-                    logger.error(e.getMessage(),e);
+                    logger.error(e.getMessage(), e);
                 }
                 firstTime = false;
             }
         }
     }
+
 }

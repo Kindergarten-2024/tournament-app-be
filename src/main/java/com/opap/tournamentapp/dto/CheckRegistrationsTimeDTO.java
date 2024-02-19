@@ -1,17 +1,18 @@
 package com.opap.tournamentapp.dto;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class CheckRegistrationsTimeDTO {
 
     private boolean isRegistrationsOpen;
-    private LocalDateTime registrationsEndTime;
+    private ZonedDateTime registrationsEndTime;
     private int rounds;
 
     public CheckRegistrationsTimeDTO() {
     }
 
-    public CheckRegistrationsTimeDTO(boolean isRegistrationsOpen, LocalDateTime registrationsEndTime, int rounds) {
+    public CheckRegistrationsTimeDTO(boolean isRegistrationsOpen, ZonedDateTime registrationsEndTime, int rounds) {
         this.isRegistrationsOpen = isRegistrationsOpen;
         this.registrationsEndTime = registrationsEndTime;
         this.rounds = rounds;
@@ -29,11 +30,11 @@ public class CheckRegistrationsTimeDTO {
         isRegistrationsOpen = registrationsOpen;
     }
 
-    public LocalDateTime getRegistrationsEndTime() {
+    public ZonedDateTime getRegistrationsEndTime() {
         return registrationsEndTime;
     }
 
-    public void setRegistrationsEndTime(LocalDateTime registrationsEndTime) {
+    public void setRegistrationsEndTime(ZonedDateTime registrationsEndTime) {
         this.registrationsEndTime = registrationsEndTime;
     }
 }
