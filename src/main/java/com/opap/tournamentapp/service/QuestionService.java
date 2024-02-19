@@ -1,8 +1,6 @@
 package com.opap.tournamentapp.service;
 
-import com.opap.tournamentapp.dto.SharedData;
 import com.opap.tournamentapp.model.Question;
-import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.repository.QuestionRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +11,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service

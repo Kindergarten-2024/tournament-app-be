@@ -3,12 +3,12 @@ package com.opap.tournamentapp.controller;
 import com.opap.tournamentapp.dto.QuestionDTO;
 import com.opap.tournamentapp.encryption.EncryptionUtils;
 import com.opap.tournamentapp.model.Question;
-import com.opap.tournamentapp.scheduler.TaskRunner;
 import com.opap.tournamentapp.service.QuestionService;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -21,9 +21,19 @@ public class QuestionController {
     private final QuestionService questionService;
     private final RegistrationsTimeService registrationsTimeService;
 
+    private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
+
     public QuestionController(QuestionService questionService, RegistrationsTimeService registrationsTimeService){
         this.questionService=questionService;
         this.registrationsTimeService = registrationsTimeService;
+    }
+
+    @GetMapping("/time-now")
+    public ResponseEntity<?> fetchCurrentTime() {
+        ZonedDateTime eetTime = ZonedDateTime.now(eetTimeZone);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = eetTime.format(formatter);
+        return ResponseEntity.ok(formattedDateTime);
     }
 
     @GetMapping("/get-current-question")
