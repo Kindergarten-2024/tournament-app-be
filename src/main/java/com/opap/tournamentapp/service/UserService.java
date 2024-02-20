@@ -5,7 +5,9 @@ import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.repository.UserRepository;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -19,10 +21,15 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private static final Logger logger= LogManager.getLogger(UserService.class);
 
-    public UserService(KafkaProducer producer, UserRepository userRepository) {
+    SimpMessagingTemplate simpMessagingTemplate;
+
+
+    public UserService(SimpMessagingTemplate simpMessagingTemplate,KafkaProducer producer, UserRepository userRepository) {
         this.producer = producer;
         this.userRepository = userRepository;
+        this.simpMessagingTemplate=simpMessagingTemplate;
     }
 
     public void loginUser(String fullName, String username, String avatarUrl) throws JsonProcessingException {
@@ -35,6 +42,12 @@ public class UserService {
             TextMessageDTO textMessageDTO = new TextMessageDTO();
             textMessageDTO.setMessage(user.getUsername() + " "+ "registered");
             producer.sendMessage("logs",textMessageDTO);
+            //also sending leaderboard when someone register
+            List<User> descPlayerList = findAllByDescScore();
+            if (descPlayerList != null && !descPlayerList.isEmpty()) {
+                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+                logger.info("Sending to /leaderboard");
+            }
             userRepository.save(user);
         }
     }
@@ -46,6 +59,12 @@ public class UserService {
             TextMessageDTO textMessageDTO = new TextMessageDTO();
             textMessageDTO.setMessage(user.get().getUsername()+" " + "unregistered");
             producer.sendMessage("logs",textMessageDTO);
+            //also sending leaderboard when someone unregister
+            List<User> descPlayerList = findAllByDescScore();
+            if (descPlayerList != null && !descPlayerList.isEmpty()) {
+                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+                logger.info("Sending to /leaderboard");
+            }
             userRepository.save(user.get());
         }
     }
