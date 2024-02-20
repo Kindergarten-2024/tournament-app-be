@@ -42,13 +42,13 @@ public class UserService {
             TextMessageDTO textMessageDTO = new TextMessageDTO();
             textMessageDTO.setMessage(user.getUsername() + " "+ "registered");
             producer.sendMessage("logs",textMessageDTO);
+            userRepository.save(user);
             //also sending leaderboard when someone register
             List<User> descPlayerList = findAllByDescScore();
             if (descPlayerList != null && !descPlayerList.isEmpty()) {
                 simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
                 logger.info("Sending to /leaderboard");
             }
-            userRepository.save(user);
         }
     }
 
@@ -59,12 +59,6 @@ public class UserService {
             TextMessageDTO textMessageDTO = new TextMessageDTO();
             textMessageDTO.setMessage(user.get().getUsername()+" " + "unregistered");
             producer.sendMessage("logs",textMessageDTO);
-            //also sending leaderboard when someone unregister
-            List<User> descPlayerList = findAllByDescScore();
-            if (descPlayerList != null && !descPlayerList.isEmpty()) {
-                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
-                logger.info("Sending to /leaderboard");
-            }
             userRepository.save(user.get());
         }
     }
