@@ -39,16 +39,18 @@ public class UserService {
         else {
             User user = userOptional.get();
             user.setRegistered(true);
-            TextMessageDTO textMessageDTO = new TextMessageDTO();
-            textMessageDTO.setMessage(user.getUsername() + " "+ "registered");
-            producer.sendMessage("logs",textMessageDTO);
             userRepository.save(user);
-            //also sending leaderboard when someone register
-            List<User> descPlayerList = findAllByDescScore();
-            if (descPlayerList != null && !descPlayerList.isEmpty()) {
-                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
-                logger.info("Sending to /leaderboard");
-            }
+        }
+        User user=findByUsername(username);
+        TextMessageDTO textMessageDTO = new TextMessageDTO();
+        textMessageDTO.setMessage(user.getUsername() + " "+ "registered");
+        producer.sendMessage("logs",textMessageDTO);
+        userRepository.save(user);
+        //also sending leaderboard when someone register
+        List<User> descPlayerList = findAllByDescScore();
+        if (descPlayerList != null && !descPlayerList.isEmpty()) {
+            simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+            logger.info("Sending to /leaderboard");
         }
     }
 
