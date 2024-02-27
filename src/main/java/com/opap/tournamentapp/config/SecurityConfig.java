@@ -112,7 +112,7 @@ public class SecurityConfig {
             logger.info("Fullname: " + fullname + " Username: " + username);
 
             try {
-                userService.loginUser(fullname, username, avatarUrl);
+                userService.loginUser(fullname, username, avatarUrl, 0);
             } catch (JsonProcessingException e) {
                 logger.error(e.getMessage(), e);
                 throw new RuntimeException(e);

@@ -98,7 +98,18 @@ public class UserAnswerService {
     private void updateUserScore(Long userId, boolean isCorrect) {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && isCorrect) {
-            user.setScore(user.getScore() + 1);
+            user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
+            // boost is basically double points for correct answer
+            if (user.getCorrectAnswerStreak() >= 3 ){
+                user.setScore(user.getScore() +2 );
+            }
+            else{
+                user.setScore(user.getScore()+1);
+            }
+            userRepository.save(user);
+        }
+        else{
+            user.setCorrectAnswerStreak(0);
             userRepository.save(user);
         }
     }
