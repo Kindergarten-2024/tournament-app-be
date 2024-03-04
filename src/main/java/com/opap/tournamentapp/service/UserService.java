@@ -32,10 +32,10 @@ public class UserService {
         this.simpMessagingTemplate=simpMessagingTemplate;
     }
 
-    public void loginUser(String fullName, String username, String avatarUrl) throws JsonProcessingException {
+    public void loginUser(String fullName, String username, String avatarUrl, int streak) throws JsonProcessingException {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
         if (userOptional.isEmpty())
-            userRepository.save(new User(fullName, username, true, avatarUrl));
+            userRepository.save(new User(fullName, username, true, avatarUrl, streak));
         else {
             User user = userOptional.get();
             user.setRegistered(true);
