@@ -19,7 +19,6 @@ public class User {
     private int correctAnswerStreak;
 
 
-
     public User () { }
 
     public User(Long userId){
@@ -33,6 +32,8 @@ public class User {
         this.avatarUrl = avatarUrl;
         this.correctAnswerStreak = correctAnswerStreak;
     }
+
+
 
     public void setCorrectAnswerStreak(int correctAnswerStreak) {
         this.correctAnswerStreak = correctAnswerStreak;

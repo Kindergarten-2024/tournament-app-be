@@ -99,19 +99,24 @@ public class UserAnswerService {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
-            // boost is basically double points for correct answer
+            // boost is basically double points for correct answer >=3 and triple on >=5
             if (user.getCorrectAnswerStreak() >= 3 ){
+                if (user.getCorrectAnswerStreak() >= 5) {
+                    user.setScore((user.getScore() + 3));
+                }
+                else{
                 user.setScore(user.getScore() +2 );
+                }
             }
             else{
                 user.setScore(user.getScore()+1);
             }
-            userRepository.save(user);
         }
         else{
+            assert user != null;
             user.setCorrectAnswerStreak(0);
-            userRepository.save(user);
         }
+        userRepository.save(user);
     }
 }
 
