@@ -17,6 +17,7 @@ public class User {
     private String avatarUrl;
 
     private int correctAnswerStreak;
+    private String item;
 
 
     public User () { }
@@ -25,16 +26,22 @@ public class User {
         this.userId = userId;
     }
 
-    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak) {
+    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item) {
         this.fullName = fullName;
         this.username = username;
         this.registered = registered;
         this.avatarUrl = avatarUrl;
         this.correctAnswerStreak = correctAnswerStreak;
+        this.item=item;
     }
 
+    public void setItem(String item){
+        this.item=item;
+    }
 
-
+    public String getItem(){
+        return item;
+    }
     public void setCorrectAnswerStreak(int correctAnswerStreak) {
         this.correctAnswerStreak = correctAnswerStreak;
     }

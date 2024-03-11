@@ -99,13 +99,19 @@ public class UserAnswerService {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
-            // boost is basically double points for correct answer >=3 and triple on >=5
+            // boost is basically double points for correct answer >=3 and triple on >=5 also win an item
             if (user.getCorrectAnswerStreak() >= 3 ){
                 if (user.getCorrectAnswerStreak() >= 5) {
                     user.setScore((user.getScore() + 3));
+                    if(user.getItem()==null || Objects.equals(user.getItem(), "freeze")){
+                        user.setItem("mask");
+                    }
                 }
                 else{
                 user.setScore(user.getScore() +2 );
+                if(user.getItem()==null) {
+                    user.setItem("freeze");
+                }
                 }
             }
             else{
@@ -117,6 +123,31 @@ public class UserAnswerService {
             user.setCorrectAnswerStreak(0);
         }
         userRepository.save(user);
+    }
+
+    //todo change item to power
+    public void usePower(Long userId,String item,Long enemyId) {
+        User user = userRepository.findById(userId).orElse(null);
+        User enemy=userRepository.findUserByUserId(enemyId);
+        logger.info(item);
+        logger.info(user);
+        if (user != null) {
+            //secure it has the item to user power of
+            if (Objects.equals(user.getItem(), item)){
+                logger.info(item);
+                if(Objects.equals(item, "mask")) //if the power is freeze
+                {
+                    double stolenPoints=enemy.getScore()/4.0;
+                    stolenPoints = Math.ceil(stolenPoints);;
+                    enemy.setScore((int) (enemy.getScore() - stolenPoints)); //losing the 1/4 of the points,todo modify it
+                    user.setScore((int) (user.getScore() + stolenPoints));
+                    user.setItem(null); //used his item so reset it
+                    userRepository.save(user);
+                    userRepository.save(enemy);
+                    //todo also handle the freeze power
+                }
+            }
+        }
     }
 }
 
