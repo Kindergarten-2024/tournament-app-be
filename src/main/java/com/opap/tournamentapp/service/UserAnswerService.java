@@ -153,6 +153,9 @@ public class UserAnswerService {
                 else if(Objects.equals(item,"freeze")){
                         String destination = "/user/" + enemy.getUsername() + "/private";
                         simpMessagingTemplate.convertAndSend(destination, "TriggerFreeze");
+                        user.setItem(null); //used his item so reset it
+                        List<User> descPlayerList = userService.findAllByDescScore();
+                        simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
                     }
                 }
             }
