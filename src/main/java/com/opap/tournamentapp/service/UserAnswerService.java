@@ -103,6 +103,7 @@ public class UserAnswerService {
             if (user.getCorrectAnswerStreak() >= 3 ){
                 if (user.getCorrectAnswerStreak() >= 5) {
                     user.setScore((user.getScore() + 3));
+                    //obtain the power
                     if(user.getItem()==null || Objects.equals(user.getItem(), "freeze")){
                         user.setItem("mask");
                     }
@@ -125,7 +126,6 @@ public class UserAnswerService {
         userRepository.save(user);
     }
 
-    //todo change item to power
     public void usePower(Long userId,String item,Long enemyId) {
         User user = userRepository.findById(userId).orElse(null);
         User enemy=userRepository.findUserByUserId(enemyId);
@@ -142,12 +142,21 @@ public class UserAnswerService {
                     enemy.setScore((int) (enemy.getScore() - stolenPoints)); //losing the 1/4 of the points,todo modify it
                     user.setScore((int) (user.getScore() + stolenPoints));
                     user.setItem(null); //used his item so reset it
+                    //save users
                     userRepository.save(user);
                     userRepository.save(enemy);
-                    //todo also handle the freeze power
+                    //also sending leaderboard to update with new points
+                    List<User> descPlayerList = userService.findAllByDescScore();
+                    simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+                    logger.info("Sending to /leaderboard because an ability was used");
+                }
+                else if(Objects.equals(item,"freeze")){
+                        String destination = "/user/" + enemy.getUsername() + "/private";
+                        simpMessagingTemplate.convertAndSend(destination, "TriggerFreeze");
+                    }
                 }
             }
         }
     }
-}
+
 
