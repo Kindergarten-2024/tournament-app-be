@@ -1,5 +1,4 @@
 package com.opap.tournamentapp.service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.kafka.KafkaConsumer;
@@ -147,12 +146,14 @@ public class UserAnswerService {
                     userRepository.save(enemy);
                     //also sending leaderboard to update with new points
                     List<User> descPlayerList = userService.findAllByDescScore();
+                    String destination = "/user/" + enemy.getUsername() + "/private";
+                    simpMessagingTemplate.convertAndSend(destination, user.getUsername()+ " used mask power on you");
                     simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
                     logger.info("Sending to /leaderboard because an ability was used");
                 }
                 else if(Objects.equals(item,"freeze")){
                         String destination = "/user/" + enemy.getUsername() + "/private";
-                        simpMessagingTemplate.convertAndSend(destination, "TriggerFreeze");
+                        simpMessagingTemplate.convertAndSend(destination, user.getUsername()+ " used freeze power on you");
                         user.setItem(null); //used his item so reset it
                         List<User> descPlayerList = userService.findAllByDescScore();
                         simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
