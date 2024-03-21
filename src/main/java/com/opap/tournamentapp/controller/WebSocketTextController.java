@@ -12,6 +12,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.socket.TextMessage;
 
 @RestController
 public class WebSocketTextController {
@@ -46,5 +47,13 @@ public class WebSocketTextController {
         Long id = userService.findUserIdByUsername(token.getPrincipal().getAttribute("login"));
         userAnswerService.submitAnswer(id, textMessageDTO.getQuestionId(), textMessageDTO.getAnswer());
     }
+
+    @MessageMapping("/usePower")
+    public void receiveMessage(@Payload TextMessageDTO textMessageDTO,OAuth2AuthenticationToken token) throws JsonProcessingException {
+        Long id = userService.findUserIdByUsername(token.getPrincipal().getAttribute("login"));
+        userAnswerService.usePower(id,textMessageDTO.getMessage(),textMessageDTO.getEnemy());
+    }
+
+
 
 }

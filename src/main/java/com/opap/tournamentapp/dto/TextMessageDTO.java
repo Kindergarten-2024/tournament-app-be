@@ -7,6 +7,7 @@ package com.opap.tournamentapp.dto;
  */
 public class TextMessageDTO {
     private String message;
+    private Long enemy;
 
     public String getMessage(){
         return message;
@@ -15,4 +16,8 @@ public class TextMessageDTO {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public Long getEnemy(){return enemy;}
+
+    public void setEnemy(Long enemy){this.enemy=enemy;}
 }

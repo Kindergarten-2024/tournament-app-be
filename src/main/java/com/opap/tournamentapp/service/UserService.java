@@ -32,10 +32,10 @@ public class UserService {
         this.simpMessagingTemplate=simpMessagingTemplate;
     }
 
-    public void loginUser(String fullName, String username, String avatarUrl) throws JsonProcessingException {
+    public void loginUser(String fullName, String username, String avatarUrl, int streak,String item) throws JsonProcessingException {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
         if (userOptional.isEmpty())
-            userRepository.save(new User(fullName, username, true, avatarUrl));
+            userRepository.save(new User(fullName, username, true, avatarUrl, streak,item));
         else {
             User user = userOptional.get();
             user.setRegistered(true);
@@ -45,6 +45,9 @@ public class UserService {
         TextMessageDTO textMessageDTO = new TextMessageDTO();
         textMessageDTO.setMessage(user.getUsername() + " "+ "registered");
         producer.sendMessage("logs",textMessageDTO);
+        //sending socket for total register
+        simpMessagingTemplate.convertAndSend("/totalRegister", totalRegistered());
+        logger.info("Sending the total registerd on total register and is " + totalRegistered());
         userRepository.save(user);
         //also sending leaderboard when someone register
         List<User> descPlayerList = findAllByDescScore();
@@ -62,6 +65,7 @@ public class UserService {
             textMessageDTO.setMessage(user.get().getUsername()+" " + "unregistered");
             producer.sendMessage("logs",textMessageDTO);
             userRepository.save(user.get());
+            simpMessagingTemplate.convertAndSend("/totalRegister", totalRegistered());
         }
     }
 

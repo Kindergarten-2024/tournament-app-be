@@ -16,18 +16,40 @@ public class User {
     private int score;
     private String avatarUrl;
 
+    private int correctAnswerStreak;
+    private String item;
+
+
     public User () { }
 
     public User(Long userId){
         this.userId = userId;
     }
 
-    public User(String fullName, String username, Boolean registered, String avatarUrl) {
+    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item) {
         this.fullName = fullName;
         this.username = username;
         this.registered = registered;
         this.avatarUrl = avatarUrl;
+        this.correctAnswerStreak = correctAnswerStreak;
+        this.item=item;
     }
+
+    public void setItem(String item){
+        this.item=item;
+    }
+
+    public String getItem(){
+        return item;
+    }
+    public void setCorrectAnswerStreak(int correctAnswerStreak) {
+        this.correctAnswerStreak = correctAnswerStreak;
+    }
+
+    public int getCorrectAnswerStreak() {
+        return correctAnswerStreak;
+    }
+
 
     public void setRegistered(Boolean registered) {
         this.registered = registered;

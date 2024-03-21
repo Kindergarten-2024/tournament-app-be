@@ -1,5 +1,4 @@
 package com.opap.tournamentapp.service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.kafka.KafkaConsumer;
@@ -98,9 +97,68 @@ public class UserAnswerService {
     private void updateUserScore(Long userId, boolean isCorrect) {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && isCorrect) {
-            user.setScore(user.getScore() + 1);
-            userRepository.save(user);
+            user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
+            // boost is basically double points for correct answer >=3 and triple on >=5 also win an item
+            if (user.getCorrectAnswerStreak() >= 3 ){
+                if (user.getCorrectAnswerStreak() >= 5) {
+                    user.setScore((user.getScore() + 3));
+                    //obtain the power
+                    if(user.getItem()==null || Objects.equals(user.getItem(), "freeze")){
+                        user.setItem("mask");
+                    }
+                }
+                else{
+                user.setScore(user.getScore() +2 );
+                if(user.getItem()==null) {
+                    user.setItem("freeze");
+                }
+                }
+            }
+            else{
+                user.setScore(user.getScore()+1);
+            }
+        }
+        else{
+            assert user != null;
+            user.setCorrectAnswerStreak(0);
+        }
+        userRepository.save(user);
+    }
+
+    public void usePower(Long userId,String item,Long enemyId) {
+        User user = userRepository.findById(userId).orElse(null);
+        User enemy=userRepository.findUserByUserId(enemyId);
+        logger.info(item);
+        logger.info(user);
+        if (user != null) {
+            //secure it has the item to user power of
+            if (Objects.equals(user.getItem(), item)){
+                logger.info(item);
+                if(Objects.equals(item, "mask")) //if the power is freeze
+                {
+                    double stolenPoints=enemy.getScore()/4.0;
+                    stolenPoints = Math.ceil(stolenPoints);;
+                    enemy.setScore((int) (enemy.getScore() - stolenPoints)); //losing the 1/4 of the points,todo modify it
+                    user.setScore((int) (user.getScore() + stolenPoints));
+                    user.setItem(null); //used his item so reset it
+                    //save users
+                    userRepository.save(enemy);
+                    //also sending leaderboard to update with new points
+                    String destination = "/user/" + enemy.getUsername() + "/private";
+                    simpMessagingTemplate.convertAndSend(destination, user.getUsername()+ " used mask power on you");
+                }
+                else if(Objects.equals(item,"freeze")){
+                        String destination = "/user/" + enemy.getUsername() + "/private";
+                        simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername()+ " used freeze power on you");
+                    }
+                user.setItem(null); //used his item so reset it
+                userRepository.save(user);
+                List<User> descPlayerList = userService.findAllByDescScore();
+                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+                logger.info("Sending to /leaderboard because an ability was used");
+                }
+            }
         }
     }
-}
+
 
