@@ -1,12 +1,13 @@
 package com.opap.tournamentapp.controller;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.TopicManagementResponse;
 import com.opap.tournamentapp.dto.NotificationRequest;
 import com.opap.tournamentapp.service.FirebaseMessagingService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/admin/notifications")
@@ -18,19 +19,24 @@ public class NotificationController {
         this.firebaseMessagingService = firebaseMessagingService;
     }
 
-    @PostMapping("/send")
-    public String sendNotification(@RequestBody NotificationRequest notificationRequest) {
+    @PostMapping("/send/custom")
+    public String sendNotification(@RequestParam("title") String title, @RequestParam("body") String body ) {
+        if (title == null || body == null) {
+            return "Error: title or body missing in the request.";
+        }
         try {
-            String deviceToken = notificationRequest.getDeviceToken();
-
-            String title = "Notification Title";
-            String body = "Notification Body";
-
-            firebaseMessagingService.sendNotification(deviceToken, title, body);
+            FirebaseMessagingService.sendMessage(title, body);
             return "Notification sent successfully";
         } catch (FirebaseMessagingException e) {
-//            e.printStackTrace();
+            e.printStackTrace();
             return "Error sending notification: " + e.getMessage();
         }
+    }
+
+    @PostMapping("/fcm-token/receive")
+    public void subscribeToken(@RequestBody String token) throws FirebaseMessagingException {
+        TopicManagementResponse response = FirebaseMessaging.getInstance().subscribeToTopic(
+                Collections.singletonList(token), "test");
+        System.out.println(response.getSuccessCount() + " tokens were subscribed successfully");
     }
 }
