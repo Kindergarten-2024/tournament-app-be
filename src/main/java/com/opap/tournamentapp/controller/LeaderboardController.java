@@ -38,4 +38,12 @@ public class LeaderboardController {
         User user = authService.getUserFromAuthenticationToken(token);
         return ResponseEntity.ok(userService.findPlayerScore(user));
     }
-}
+
+    @GetMapping("/player-item")
+        public ResponseEntity<String> sendPlayerItem(OAuth2AuthenticationToken token){
+            User user = authService.getUserFromAuthenticationToken(token);
+            return ResponseEntity.ok(userService.findPlayerItem(user));
+        }
+    }
+
+
