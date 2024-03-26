@@ -56,6 +56,11 @@ public class LoginController {
         return "redirect:/oauth2/authorization/google";
     }
 
+    @RequestMapping("/redirect")
+    public String redirectToLogin() {
+        return "redirect:" + frontendUrl;
+    }
+
     /**
      * <h2> Successful Login Redirect </h2>
      *

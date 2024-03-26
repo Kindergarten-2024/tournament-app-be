@@ -69,10 +69,11 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
                 .authorizeHttpRequests()
-                .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**", "/admin/**","/ws-message/**").permitAll()
+                .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**","/admin/**","/ws-message/**","/redirect").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
+                .loginPage("/redirect")
                 .defaultSuccessUrl("/oauth/login/success", true);
         return http.build();
     }
