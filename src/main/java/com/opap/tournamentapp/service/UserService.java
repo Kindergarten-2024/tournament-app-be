@@ -35,7 +35,7 @@ public class UserService {
     public void loginUser(String fullName, String username, String avatarUrl, int streak,String item) throws JsonProcessingException {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
         if (userOptional.isEmpty())
-            userRepository.save(new User(fullName, username, true, avatarUrl, streak,item));
+            userRepository.save(new User(fullName, username, true, avatarUrl, streak,item,false,false));
         else {
             User user = userOptional.get();
             user.setRegistered(true);
@@ -132,6 +132,23 @@ public class UserService {
         }
         return null;
     }
+
+    public void resetMaskCooldown(){
+        List<User> users= getAllUsers();
+        for (User user:users){
+            user.setMask_debuff(false);
+            userRepository.save(user);
+        }
+    }
+
+    public void resetFreezeCooldown(){
+        List<User> users= getAllUsers();
+        for (User user:users){
+            user.setFreeze_debuff(false);
+            userRepository.save(user);
+        }
+    }
+
 
     public int totalRegistered(){
         return userRepository.findAllByRegisteredTrue().size();

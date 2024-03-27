@@ -99,6 +99,10 @@ public class UserAnswerService {
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
             // boost is basically double points for correct answer >=3 and triple on >=5 also win an item
+            if (user.getCorrectAnswerStreak()>=2){
+                user.setFreeze_debuff(false);
+                userRepository.save(user);
+            }
             if (user.getCorrectAnswerStreak() >= 3 ){
                 if (user.getCorrectAnswerStreak() >= 5) {
                     user.setScore((user.getScore() + 3));
@@ -134,11 +138,12 @@ public class UserAnswerService {
             //secure it has the item to user power of
             if (Objects.equals(user.getItem(), item)){
                 logger.info(item);
-                if(Objects.equals(item, "mask")) //if the power is freeze
+                if(Objects.equals(item, "mask") && !enemy.getMask_debuff()) //if the power is freeze
                 {
                     double stolenPoints=enemy.getScore()/4.0;
                     stolenPoints = Math.ceil(stolenPoints);;
                     enemy.setScore((int) (enemy.getScore() - stolenPoints)); //losing the 1/4 of the points,todo modify it
+                    enemy.setMask_debuff(true);
                     user.setScore((int) (user.getScore() + stolenPoints));
                     user.setItem(null); //used his item so reset it
                     //save users
@@ -147,9 +152,11 @@ public class UserAnswerService {
                     String destination = "/user/" + enemy.getUsername() + "/private";
                     simpMessagingTemplate.convertAndSend(destination, user.getUsername()+ " used mask power on you");
                 }
-                else if(Objects.equals(item,"freeze")){
+                else if(Objects.equals(item,"freeze") && !enemy.getFreeze_debuff()){
                         String destination = "/user/" + enemy.getUsername() + "/private";
+                        enemy.setFreeze_debuff(true);
                         simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername()+ " used freeze power on you");
+                        userRepository.save(enemy);
                     }
                 user.setItem(null); //used his item so reset it
                 userRepository.save(user);
