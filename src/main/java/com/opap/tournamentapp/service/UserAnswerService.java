@@ -134,11 +134,12 @@ public class UserAnswerService {
             //secure it has the item to user power of
             if (Objects.equals(user.getItem(), item)){
                 logger.info(item);
-                if(Objects.equals(item, "mask")) //if the power is freeze
+                if(Objects.equals(item, "mask") && !enemy.getMask_debuff()) //if the power is freeze
                 {
                     double stolenPoints=enemy.getScore()/4.0;
                     stolenPoints = Math.ceil(stolenPoints);;
                     enemy.setScore((int) (enemy.getScore() - stolenPoints)); //losing the 1/4 of the points,todo modify it
+                    enemy.setMask_debuff(true);
                     user.setScore((int) (user.getScore() + stolenPoints));
                     user.setItem(null); //used his item so reset it
                     //save users
@@ -147,9 +148,11 @@ public class UserAnswerService {
                     String destination = "/user/" + enemy.getUsername() + "/private";
                     simpMessagingTemplate.convertAndSend(destination, user.getUsername()+ " used mask power on you");
                 }
-                else if(Objects.equals(item,"freeze")){
+                else if(Objects.equals(item,"freeze") && enemy.getFreeze_debuff()<2){
                         String destination = "/user/" + enemy.getUsername() + "/private";
+                        enemy.increaseFreezeDebuff();
                         simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername()+ " used freeze power on you");
+                        userRepository.save(enemy);
                     }
                 user.setItem(null); //used his item so reset it
                 userRepository.save(user);

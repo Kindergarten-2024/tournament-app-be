@@ -18,8 +18,11 @@ public class RegistrationsTimeService {
 
     final RegistrationsTimeRepository registrationsTimeRepository;
 
-    public RegistrationsTimeService(RegistrationsTimeRepository registrationsTimeRepository){
+    final UserService userService;
+
+    public RegistrationsTimeService(RegistrationsTimeRepository registrationsTimeRepository, UserService userService){
         this.registrationsTimeRepository=registrationsTimeRepository;
+        this.userService = userService;
     }
 
     public void registrationsTimeInit() {
@@ -56,6 +59,8 @@ public class RegistrationsTimeService {
     public void setRegistrationRoundsAndNextQuizStartTime(){
                 RegistrationsTime registrationsTime = registrationsTimeRepository.findFirstRecord();
                 registrationsTime.setTournamentRound(registrationsTime.getTournamentRound()+1);
+                userService.resetMaskCooldown(); //reset mask in every first round
+                userService.resetFreezeCooldown(); //reset freeze in every first round
                 registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(5));
                 registrationsTimeRepository.save(registrationsTime);
     }
