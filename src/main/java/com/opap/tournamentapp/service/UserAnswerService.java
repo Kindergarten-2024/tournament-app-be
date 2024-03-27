@@ -99,10 +99,6 @@ public class UserAnswerService {
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
             // boost is basically double points for correct answer >=3 and triple on >=5 also win an item
-            if (user.getCorrectAnswerStreak()>=2){
-                user.setFreeze_debuff(false);
-                userRepository.save(user);
-            }
             if (user.getCorrectAnswerStreak() >= 3 ){
                 if (user.getCorrectAnswerStreak() >= 5) {
                     user.setScore((user.getScore() + 3));
@@ -152,9 +148,9 @@ public class UserAnswerService {
                     String destination = "/user/" + enemy.getUsername() + "/private";
                     simpMessagingTemplate.convertAndSend(destination, user.getUsername()+ " used mask power on you");
                 }
-                else if(Objects.equals(item,"freeze") && !enemy.getFreeze_debuff()){
+                else if(Objects.equals(item,"freeze") && enemy.getFreeze_debuff()<2){
                         String destination = "/user/" + enemy.getUsername() + "/private";
-                        enemy.setFreeze_debuff(true);
+                        enemy.increaseFreezeDebuff();
                         simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername()+ " used freeze power on you");
                         userRepository.save(enemy);
                     }

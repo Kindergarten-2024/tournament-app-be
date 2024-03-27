@@ -15,7 +15,7 @@ public class User {
     private Boolean registered;
     private int score;
 
-    private boolean freeze_debuff;
+    private int freeze_debuff;
     private boolean mask_debuff;
 
     private String avatarUrl;
@@ -30,7 +30,7 @@ public class User {
         this.userId = userId;
     }
 
-    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item,boolean freeze_debuff,boolean mask_debuff) {
+    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item,int freeze_debuff,boolean mask_debuff) {
         this.fullName = fullName;
         this.username = username;
         this.registered = registered;
@@ -86,7 +86,7 @@ public class User {
     public void setScore(int score) {this.score = score;}
     public int getScore() {return score;}
 
-    public boolean getFreeze_debuff(){
+    public int getFreeze_debuff(){
         return freeze_debuff;
     }
 
@@ -94,8 +94,12 @@ public class User {
         return mask_debuff;
     }
 
-    public void setFreeze_debuff(boolean freeze_debuff){
+    public void setFreeze_debuff(int freeze_debuff){
         this.freeze_debuff=freeze_debuff;
+    }
+
+    public void increaseFreezeDebuff(){
+        this.freeze_debuff++;
     }
     public void setMask_debuff(boolean mask_debuff){
         this.mask_debuff=mask_debuff;
