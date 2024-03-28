@@ -98,24 +98,18 @@ public class UserAnswerService {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
-            // boost is basically double points for correct answer >=3 and triple on >=5 also win an item
-            if (user.getCorrectAnswerStreak() >= 3 ){
-                if (user.getCorrectAnswerStreak() >= 5) {
+            // boost is basically double points for correct answer >=3 and triple on >=5 also win an power
+            if (user.getCorrectAnswerStreak() > 0 ){
+                obtainPower(user); //obtain power depending on streak
+                if (user.getCorrectAnswerStreak() >= 5) { //5+
                     user.setScore((user.getScore() + 3));
-                    //obtain the power
-                    if(user.getItem()==null || Objects.equals(user.getItem(), "freeze")){
-                        user.setItem("mask");
-                    }
                 }
-                else{
+                else if(user.getCorrectAnswerStreak() >=3){ //3-4
                 user.setScore(user.getScore() +2 );
-                if(user.getItem()==null) {
-                    user.setItem("freeze");
-                }
                 }
             }
             else{
-                user.setScore(user.getScore()+1);
+                user.setScore(user.getScore()+1); //0-1-2
             }
         }
         else{
@@ -123,6 +117,22 @@ public class UserAnswerService {
             user.setCorrectAnswerStreak(0);
         }
         userRepository.save(user);
+    }
+
+    public void obtainPower(User user){
+        if(user.getCorrectAnswerStreak() % 5 ==0 ){
+                user.setItem("mask");
+        }
+        else if(user.getCorrectAnswerStreak() % 5== 1 ){
+            if(!Objects.equals(user.getItem(), "freeze") && !Objects.equals(user.getItem(),"mask")){
+                user.setItem("50-50");
+            }
+        }
+        else if (user.getCorrectAnswerStreak() % 5== 3){
+            if(!Objects.equals(user.getItem(), "mask")){
+                user.setItem("freeze");
+            }
+        }
     }
 
     public void usePower(Long userId,String item,Long enemyId) {
@@ -134,7 +144,7 @@ public class UserAnswerService {
             //secure it has the item to user power of
             if (Objects.equals(user.getItem(), item)){
                 logger.info(item);
-                if(Objects.equals(item, "mask") && !enemy.getMask_debuff()) //if the power is freeze
+                if(Objects.equals(item, "mask") && !enemy.getMask_debuff()) //if the power is mask
                 {
                     double stolenPoints=enemy.getScore()/4.0;
                     stolenPoints = Math.ceil(stolenPoints);;

@@ -21,6 +21,7 @@ public class User {
     private String avatarUrl;
 
     private int correctAnswerStreak;
+
     private String item;
 
 
