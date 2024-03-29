@@ -16,6 +16,9 @@ public class User {
     private int score;
     private String avatarUrl;
 
+    private String email;
+    private String password;
+
     private int correctAnswerStreak;
 
 
@@ -32,6 +35,16 @@ public class User {
         this.registered = registered;
         this.avatarUrl = avatarUrl;
         this.correctAnswerStreak = correctAnswerStreak;
+    }
+
+    public User(String fullname, String username, Boolean registerd, int correctAnswerStreak, String email, String password){
+
+        this.fullName = fullname;
+        this.username = username;
+        this.registered = registerd;
+        this.correctAnswerStreak = correctAnswerStreak;
+        this.email = email;
+        this.password = password;
     }
 
     public void setCorrectAnswerStreak(int correctAnswerStreak) {
@@ -71,4 +84,9 @@ public class User {
     public void setFullName(String fullName) {this.fullName = fullName;}
     public void setScore(int score) {this.score = score;}
     public int getScore() {return score;}
+    public String getEmail() {return email;}
+    public String getPassword() {return password;}
+    public void setEmail(String email) {this.email = email;}
+    public void setPassword(String password) {this.password = password;}
 }
+

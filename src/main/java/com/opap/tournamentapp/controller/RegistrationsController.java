@@ -1,11 +1,16 @@
 package com.opap.tournamentapp.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.dto.CheckRegistrationsTimeDTO;
+import com.opap.tournamentapp.dto.RegistrationDto;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.AuthService;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
 import com.opap.tournamentapp.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,14 +32,27 @@ public class RegistrationsController {
 
     private final AuthService authService;
 
-    private final RegistrationsTimeService registrationsTimeService;
 
-    public RegistrationsController(UserService userService, AuthService authService, RegistrationsTimeService registrationsTimeService){
+    private final RegistrationsTimeService registrationsTimeService;
+    private final PasswordEncoder passwordEncoder;
+
+    public RegistrationsController(UserService userService, AuthService authService, RegistrationsTimeService registrationsTimeService, PasswordEncoder passwordEncoder){
         this.userService=userService;
         this.authService=authService;
         this.registrationsTimeService=registrationsTimeService;
+        this.passwordEncoder = passwordEncoder;
 
     }
+    @PostMapping("/auth")
+    public ResponseEntity<?> authenticateOrRegisterUser(@RequestBody RegistrationDto registrationDto) throws JsonProcessingException {
+        return userService.loginUserOrRegister(
+                registrationDto.getFullName(),
+                registrationDto.getUsername(),
+                registrationDto.getEmail(),
+                registrationDto.getPassword()
+        );
+    }
+
 
     /**
      * <h2> Registration </h2>
