@@ -30,7 +30,7 @@ public class RegistrationsTimeService {
         ZoneId zoneId = ZoneId.of("Europe/Athens");
 
 
-        LocalDateTime localDateTime = LocalDateTime.of(2024, Month.FEBRUARY, 28, 17, 0, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2024, Month.APRIL, 28, 17, 0, 0);
 
         // Converting LocalDateTime to ZonedDateTime using the specified time zone
         ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, zoneId);

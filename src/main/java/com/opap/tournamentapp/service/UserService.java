@@ -5,14 +5,16 @@ import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.repository.UserRepository;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -72,6 +74,19 @@ public class UserService {
     public int findPlayerPosition(User user) {
         List<User> leaderboard = userRepository.findAllByRegisteredTrueOrderByScoreDesc();
         return leaderboard.indexOf(user) + 1;
+    }
+
+    public void setUserFcmToken(User user, String token) {
+        user.setFcmToken(token);
+        userRepository.save(user);
+    }
+
+    public List<String> getFCMTokensFromUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(User::getFcmToken)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public int findPlayerScore(User user) {
