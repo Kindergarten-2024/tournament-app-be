@@ -103,20 +103,33 @@ public class UserAnswerService {
                 obtainPower(user); //obtain power depending on streak
                 if (user.getCorrectAnswerStreak() >= 5) { //5+
                     user.setScore((user.getScore() + 3));
+                    SendStreakSocket(user,"X3");
                 }
                 else if(user.getCorrectAnswerStreak() >=3){ //3-4
                 user.setScore(user.getScore() +2 );
+                    SendStreakSocket(user,"X2");
+                }
+                else{
+                    SendStreakSocket(user,"X1");
                 }
             }
             else{
                 user.setScore(user.getScore()+1); //0-1-2
+                SendStreakSocket(user,"X1");
             }
         }
         else{
             assert user != null;
             user.setCorrectAnswerStreak(0);
+            SendStreakSocket(user,"X1");
         }
         userRepository.save(user);
+    }
+
+
+    public void SendStreakSocket(User user,String message){
+        String destination = "/user/" + user.getUsername() + "/privateStreak";
+        simpMessagingTemplate.convertAndSend(destination, message);
     }
 
     public void obtainPower(User user){
