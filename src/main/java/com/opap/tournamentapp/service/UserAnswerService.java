@@ -109,6 +109,9 @@ public class UserAnswerService {
                 user.setScore(user.getScore() +2 );
                     SendStreakSocket(user,"X2");
                 }
+                else{
+                    SendStreakSocket(user,"X1");
+                }
             }
             else{
                 user.setScore(user.getScore()+1); //0-1-2
