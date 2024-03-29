@@ -1,6 +1,5 @@
 package com.opap.tournamentapp.dto;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 public class CheckRegistrationsTimeDTO {

@@ -23,6 +23,7 @@ public class User {
     private int correctAnswerStreak;
 
     private String item;
+    private String fcmToken;
 
 
     public User () { }
@@ -40,6 +41,7 @@ public class User {
         this.item=item;
         this.freeze_debuff=freeze_debuff;
         this.mask_debuff=mask_debuff;
+        this.fcmToken = null;
     }
 
     public void setItem(String item){
@@ -104,5 +106,13 @@ public class User {
     }
     public void setMask_debuff(boolean mask_debuff){
         this.mask_debuff=mask_debuff;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }
