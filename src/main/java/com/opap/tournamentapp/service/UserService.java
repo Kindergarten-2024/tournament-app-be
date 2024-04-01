@@ -97,6 +97,10 @@ public class UserService {
         return user.getItem();
     }
 
+    public int findPlayerStreak(User user){
+        return user.getCorrectAnswerStreak();
+    }
+
     // LeaderBoard
     public List<User> findAllByDescScore() {
         return userRepository.findAllByRegisteredTrueOrderByScoreDesc();
