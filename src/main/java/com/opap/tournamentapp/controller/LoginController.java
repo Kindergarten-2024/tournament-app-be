@@ -51,9 +51,9 @@ public class LoginController {
      * If user not authenticated, the endpoint automatically redirects to Google OAuth2 login page
      * @return Redirection to Google OAuth2 page
      */
-    @RequestMapping("/oauth/login/google")
-    public String loginRedirectGoogle() {
-        return "redirect:/oauth2/authorization/google";
+    @RequestMapping("/oauth/login/linkedin")
+    public String loginRedirectLinkedin() {
+        return "redirect:/oauth2/authorization/linkedin";
     }
 
     @RequestMapping("/redirect")

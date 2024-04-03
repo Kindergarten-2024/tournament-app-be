@@ -68,7 +68,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
                 .authorizeHttpRequests()
-                .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**","/admin/**","/ws-message/**","/redirect").permitAll()
+                .requestMatchers("/oauth/login/linkedin","/oauth/login/github","/loggedin/**","/admin/**","/redirect", "/ws-message/public/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
@@ -101,9 +101,9 @@ public class SecurityConfig {
                 fullname = user.getAttribute("name");
                 username = user.getAttribute("login");
                 avatarUrl = user.getAttribute("avatar_url");
-            } else if ("google".equals(registrationId)) {
+            } else if ("linkedin".equals(registrationId)) {
                 fullname = user.getAttribute("name");
-                username = user.getAttribute("email"); // Assuming you use email as username for Google
+                username = user.getAttribute("email");
                 avatarUrl = user.getAttribute("picture");
             } else {
                 throw new IllegalArgumentException("Unsupported OAuth2 provider: " + registrationId);
