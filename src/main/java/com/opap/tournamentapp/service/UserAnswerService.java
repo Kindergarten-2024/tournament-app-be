@@ -107,6 +107,9 @@ public class UserAnswerService {
                 else if(user.getCorrectAnswerStreak() >=3){ //3-4
                 user.setScore(user.getScore() +2 );
                 }
+                else{
+                    user.setScore(user.getScore()+1);
+                }
             }
             else{
                 user.setScore(user.getScore()+1); //0-1-2
