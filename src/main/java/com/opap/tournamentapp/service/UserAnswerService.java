@@ -118,24 +118,22 @@ public class UserAnswerService {
         else{
             assert user != null;
             user.setCorrectAnswerStreak(0);
+            user.setItem("null");
         }
         userRepository.save(user);
     }
 
 
     public void obtainPower(User user){
-        if(user.getCorrectAnswerStreak() % 5 ==0 ){
-                user.setItem("mask");
-        }
-        else if(user.getCorrectAnswerStreak() % 5== 1 ){
-            if(!Objects.equals(user.getItem(), "freeze") && !Objects.equals(user.getItem(),"mask")){
+        if(user.getCorrectAnswerStreak() ==1 ){
                 user.setItem("50-50");
-            }
         }
-        else if (user.getCorrectAnswerStreak() % 5== 3){
-            if(!Objects.equals(user.getItem(), "mask")){
+        else if(user.getCorrectAnswerStreak() == 3 ){
                 user.setItem("freeze");
-            }
+        }
+        else if (user.getCorrectAnswerStreak() == 5){
+                user.setItem("mask");
+
         }
     }
 
