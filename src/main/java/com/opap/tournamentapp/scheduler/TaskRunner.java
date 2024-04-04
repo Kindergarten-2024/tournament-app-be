@@ -75,21 +75,23 @@ public class TaskRunner {
             questionNumber++;
             // int 5 for sending 4 questions in each round
             if (questionNumber == 11 && round == 1) {
-                stopScheduler();
                 updateRoundsAndTime();
+                questionService.updateCurrentQuestion(questionNumber);
                 questionNumber--;
+                stopScheduler();
             } else if (questionNumber == 21 && round == 2) {
                 questionNumber=0;
-                stopScheduler();
                 updateRoundsAndTime();
+                stopScheduler();
             }
+            else {
+                Question currentQuestion = questionService.getQuestionByOrder(questionNumber);
 
-            Question currentQuestion = questionService.getQuestionByOrder(questionNumber);
-
-            if (currentQuestion != null) {
-                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), questionNumber);
-                kafkaProducer.sendQuestion("questions", dto);
-                questionService.updateCurrentQuestion(questionNumber);
+                if (currentQuestion != null) {
+                    QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), questionNumber);
+                    kafkaProducer.sendQuestion("questions", dto);
+                    questionService.updateCurrentQuestion(questionNumber);
+                }
             }
         } catch (JsonProcessingException e) {
             logger.error("Task interrupted " + e.getMessage(), e);
