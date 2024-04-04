@@ -13,7 +13,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker( "/questions", "/leaderboard", "/registrations-time","/logs","/lock","/leaderboardBefore");
+        config.enableSimpleBroker( "/questions", "/leaderboard", "/registrations-time","/logs","/lock","/leaderboardBefore","/totalRegister","/item","/user/");
         config.setApplicationDestinationPrefixes("/app");
     }
 
@@ -23,5 +23,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns("*")
                 .withSockJS()
                 .setInterceptors(new CustomHandshakeInterceptor());
+        registry.addEndpoint("/ws-message/public").setAllowedOriginPatterns("*").withSockJS();
     }
 }

@@ -14,6 +14,10 @@ public class User {
     private String username;
     private Boolean registered;
     private int score;
+
+    private int freeze_debuff;
+    private boolean mask_debuff;
+
     private String avatarUrl;
 
     private String email;
@@ -23,21 +27,30 @@ public class User {
 
 
 
+
+    private String item;
+    private String fcmToken;
+
+
     public User () { }
 
     public User(Long userId){
         this.userId = userId;
     }
 
-    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak) {
+    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item,int freeze_debuff,boolean mask_debuff) {
         this.fullName = fullName;
         this.username = username;
         this.registered = registered;
         this.avatarUrl = avatarUrl;
         this.correctAnswerStreak = correctAnswerStreak;
+        this.item=item;
+        this.freeze_debuff=freeze_debuff;
+        this.mask_debuff=mask_debuff;
+        this.fcmToken = null;
     }
 
-    public User(String fullname, String username, Boolean registerd, int correctAnswerStreak, String email, String password){
+    public User(String fullname, String username, Boolean registerd, int correctAnswerStreak, String email, String password,String item,int freeze_debuff,boolean mask_debuff){
 
         this.fullName = fullname;
         this.username = username;
@@ -45,11 +58,28 @@ public class User {
         this.correctAnswerStreak = correctAnswerStreak;
         this.email = email;
         this.password = password;
+        this.correctAnswerStreak = correctAnswerStreak;
+        this.item=item;
+        this.freeze_debuff=freeze_debuff;
+        this.mask_debuff=mask_debuff;
+        this.fcmToken = null;
     }
+
+    public void setItem(String item){
+        this.item=item;
+    }
+
+    public String getItem(){
+        return item;
+    }
+
 
     public void setCorrectAnswerStreak(int correctAnswerStreak) {
         this.correctAnswerStreak = correctAnswerStreak;
     }
+
+
+
 
     public int getCorrectAnswerStreak() {
         return correctAnswerStreak;
@@ -88,5 +118,32 @@ public class User {
     public String getPassword() {return password;}
     public void setEmail(String email) {this.email = email;}
     public void setPassword(String password) {this.password = password;}
+
+    public int getFreeze_debuff(){
+        return freeze_debuff;
+    }
+
+    public boolean getMask_debuff(){
+        return mask_debuff;
+    }
+
+    public void setFreeze_debuff(int freeze_debuff){
+        this.freeze_debuff=freeze_debuff;
+    }
+
+    public void increaseFreezeDebuff(){
+        this.freeze_debuff++;
+    }
+    public void setMask_debuff(boolean mask_debuff){
+        this.mask_debuff=mask_debuff;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
 }
 

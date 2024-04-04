@@ -60,17 +60,4 @@ public class LeaderboardController {
         }
         return ResponseEntity.ok(userService.findPlayerScore(user));
     }
-
-//
-//    @GetMapping("/player-position")
-//    public ResponseEntity<Integer> sendPlayerPosition(OAuth2AuthenticationToken token) {
-//        User user = authService.getUserFromAuthenticationToken(token);
-//        return ResponseEntity.ok(userService.findPlayerPosition(user));
-//    }
-//
-//    @GetMapping("/player-score")
-//    public ResponseEntity<Integer> sendPlayerScore(OAuth2AuthenticationToken token) {
-//        User user = authService.getUserFromAuthenticationToken(token);
-//        return ResponseEntity.ok(userService.findPlayerScore(user));
-//    }
 }

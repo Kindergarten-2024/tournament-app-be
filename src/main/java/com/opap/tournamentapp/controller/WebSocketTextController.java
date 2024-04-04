@@ -85,6 +85,13 @@ public class WebSocketTextController {
         } else {
             throw new IllegalStateException("User ID could not be determined from the authentication token");
         }
+    }
+
+    //TODO: remove oauth2 token variable.
+    @MessageMapping("/usePower")
+    public void receiveMessage(@Payload TextMessageDTO textMessageDTO,OAuth2AuthenticationToken token) throws JsonProcessingException {
+        Long id = userService.findUserIdByUsername(token.getPrincipal().getAttribute("login"));
+        userAnswerService.usePower(id,textMessageDTO.getMessage(),textMessageDTO.getEnemy());
     }}
 
 

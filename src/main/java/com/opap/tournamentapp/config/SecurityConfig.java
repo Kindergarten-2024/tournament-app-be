@@ -61,10 +61,12 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
                 .authorizeHttpRequests()
-                .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**", "/admin/**","/ws-message/**","/login","/register","/auth").permitAll()
+//                .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**", "/admin/**","/ws-message/**","/login","/register","/auth").permitAll()
+                .requestMatchers("/oauth/login/linkedin","/oauth/login/github","/loggedin/**","/admin/**","/redirect", "/ws-message/public/**","/auth").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
+                .loginPage("/redirect")
                 .defaultSuccessUrl("/oauth/login/success", true)
                 .and()
                 .logout()
@@ -74,6 +76,7 @@ public class SecurityConfig {
                 .clearAuthentication(true)
                 .and()
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -105,13 +108,30 @@ public class SecurityConfig {
 
             if ("github".equals(registrationId)) {
                 try {
-                    userService.loginUser(fullname, username, avatarUrl, 0);
+                    userService.loginUser(fullname, username, avatarUrl, 0,null);
                 } catch (JsonProcessingException e) {
                     logger.error(e.getMessage(), e);
                     throw new RuntimeException(e);
                 }
+                fullname = user.getAttribute("name");
+                username = user.getAttribute("login");
+                avatarUrl = user.getAttribute("avatar_url");
+            } else if ("linkedin".equals(registrationId)) {
+                fullname = user.getAttribute("name");
+                username = user.getAttribute("email");
+                avatarUrl = user.getAttribute("picture");
+            } else {
+                throw new IllegalArgumentException("Unsupported OAuth2 provider: " + registrationId);
             }
+
             logger.info("Fullname: " + fullname + " Username: " + username);
+
+            try {
+                userService.loginUser(fullname, username, avatarUrl, 0,null);
+            } catch (JsonProcessingException e) {
+                logger.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
             return user;
         };
     }

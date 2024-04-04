@@ -58,6 +58,21 @@ public class LoginController {
     }
 
 
+    /**
+     * <h2> Login Redirect Google</h2>
+     *
+     * If user not authenticated, the endpoint automatically redirects to Google OAuth2 login page
+     * @return Redirection to Google OAuth2 page
+     */
+    @RequestMapping("/oauth/login/linkedin")
+    public String loginRedirectLinkedin() {
+        return "redirect:/oauth2/authorization/linkedin";
+    }
+
+    @RequestMapping("/redirect")
+    public String redirectToLogin() {
+        return "redirect:" + frontendUrl;
+    }
 
     /**
      * <h2> Successful Login Redirect </h2>
@@ -81,27 +96,6 @@ public class LoginController {
      * @return A new ResponseEntity with a 200 (OK) status code and response body a CheckLoginResponse object
      *         { "loggedin": true, user } if user is logged in, else { "loggedin": false, null }
      */
-//    @GetMapping("/loggedin")
-//    public ResponseEntity<CheckLoginResponseDTO> loggedIn(OAuth2AuthenticationToken token) {
-//        CacheControl cacheControl = CacheControl.noStore().mustRevalidate();
-//
-//        if (token != null) {
-//            Map<String, Object> user = authService.userMap(token);
-//            LOGGER.info(user);
-//
-//            CheckLoginResponseDTO response = new CheckLoginResponseDTO(true, user);
-//            return ResponseEntity.ok()
-//                    .cacheControl(cacheControl)
-//                    .body(response);
-//        } else {
-//            CheckLoginResponseDTO response2 = new CheckLoginResponseDTO(false, null);
-//            return ResponseEntity.ok()
-//                    .cacheControl(cacheControl)
-//                    .body(response2);
-//        }
-//    }
-
-
     @GetMapping("/loggedin")
     public ResponseEntity<CheckLoginResponseDTO> loggedIn() {
         CacheControl cacheControl = CacheControl.noStore().mustRevalidate();

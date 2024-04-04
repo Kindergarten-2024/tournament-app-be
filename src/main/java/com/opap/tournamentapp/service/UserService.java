@@ -21,13 +21,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Text;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -60,10 +63,10 @@ public class UserService {
         this.passwordEncoder=passwordEncoder;
     }
 
-    public void loginUser(String fullName, String username, String avatarUrl, int streak) throws JsonProcessingException {
+    public void loginUser(String fullName, String username, String avatarUrl, int streak,String item) throws JsonProcessingException {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
         if (userOptional.isEmpty())
-            userRepository.save(new User(fullName, username, true, avatarUrl, streak));
+            userRepository.save(new User(fullName, username, true, avatarUrl, streak,item,0,false));
         else {
             User user = userOptional.get();
             user.setRegistered(true);
@@ -142,8 +145,29 @@ public class UserService {
         return leaderboard.indexOf(user) + 1;
     }
 
+    public void setUserFcmToken(User user, String token) {
+        user.setFcmToken(token);
+        userRepository.save(user);
+    }
+
+    public List<String> getFCMTokensFromUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(User::getFcmToken)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
     public int findPlayerScore(User user) {
         return user.getScore();
+    }
+
+    public String findPlayerItem(User user){
+        return user.getItem();
+    }
+
+    public int findPlayerStreak(User user){
+        return user.getCorrectAnswerStreak();
     }
 
     // LeaderBoard
@@ -196,6 +220,23 @@ public class UserService {
         }
         return null;
     }
+
+    public void resetMaskCooldown(){
+        List<User> users= getAllUsers();
+        for (User user:users){
+            user.setMask_debuff(false);
+            userRepository.save(user);
+        }
+    }
+
+    public void resetFreezeCooldown(){
+        List<User> users= getAllUsers();
+        for (User user:users){
+            user.setFreeze_debuff(0);
+            userRepository.save(user);
+        }
+    }
+
 
     public int totalRegistered(){
         return userRepository.findAllByRegisteredTrue().size();

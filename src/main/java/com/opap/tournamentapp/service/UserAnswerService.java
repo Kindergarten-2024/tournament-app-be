@@ -1,5 +1,4 @@
 package com.opap.tournamentapp.service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.kafka.KafkaConsumer;
@@ -99,19 +98,84 @@ public class UserAnswerService {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
-            // boost is basically double points for correct answer
-            if (user.getCorrectAnswerStreak() >= 3 ){
+            // boost is basically double points for correct answer >=3 and triple on >=5 also win an power
+            if (user.getCorrectAnswerStreak() > 0 ){
+                obtainPower(user); //obtain power depending on streak
+                if (user.getCorrectAnswerStreak() >= 5) { //5+
+                    user.setScore((user.getScore() + 3));
+                }
+                else if(user.getCorrectAnswerStreak() >=3){ //3-4
                 user.setScore(user.getScore() +2 );
+                }
+                else{
+                    user.setScore(user.getScore()+1);
+                }
             }
             else{
-                user.setScore(user.getScore()+1);
+                user.setScore(user.getScore()+1); //0-1-2
             }
-            userRepository.save(user);
         }
         else{
+            assert user != null;
             user.setCorrectAnswerStreak(0);
-            userRepository.save(user);
+        }
+        userRepository.save(user);
+    }
+
+
+    public void obtainPower(User user){
+        if(user.getCorrectAnswerStreak() % 5 ==0 ){
+                user.setItem("mask");
+        }
+        else if(user.getCorrectAnswerStreak() % 5== 1 ){
+            if(!Objects.equals(user.getItem(), "freeze") && !Objects.equals(user.getItem(),"mask")){
+                user.setItem("50-50");
+            }
+        }
+        else if (user.getCorrectAnswerStreak() % 5== 3){
+            if(!Objects.equals(user.getItem(), "mask")){
+                user.setItem("freeze");
+            }
         }
     }
-}
+
+    public void usePower(Long userId,String item,Long enemyId) {
+        User user = userRepository.findById(userId).orElse(null);
+        User enemy=userRepository.findUserByUserId(enemyId);
+        logger.info(item);
+        logger.info(user);
+        if (user != null) {
+            //secure it has the item to user power of
+            if (Objects.equals(user.getItem(), item)){
+                logger.info(item);
+                if(Objects.equals(item, "mask") && !enemy.getMask_debuff()) //if the power is mask
+                {
+                    double stolenPoints=enemy.getScore()/4.0;
+                    stolenPoints = Math.ceil(stolenPoints);;
+                    enemy.setScore((int) (enemy.getScore() - stolenPoints)); //losing the 1/4 of the points,todo modify it
+                    enemy.setMask_debuff(true);
+                    user.setScore((int) (user.getScore() + stolenPoints));
+                    user.setItem(null); //used his item so reset it
+                    //save users
+                    userRepository.save(enemy);
+                    //also sending leaderboard to update with new points
+                    String destination = "/user/" + enemy.getUsername() + "/private";
+                    simpMessagingTemplate.convertAndSend(destination, user.getUsername()+ " used mask power on you");
+                }
+                else if(Objects.equals(item,"freeze") && enemy.getFreeze_debuff()<2){
+                        String destination = "/user/" + enemy.getUsername() + "/private";
+                        enemy.increaseFreezeDebuff();
+                        simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername()+ " used freeze power on you");
+                        userRepository.save(enemy);
+                    }
+                user.setItem(null); //used his item so reset it
+                userRepository.save(user);
+                List<User> descPlayerList = userService.findAllByDescScore();
+                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+                logger.info("Sending to /leaderboard because an ability was used");
+                }
+            }
+        }
+    }
+
 
