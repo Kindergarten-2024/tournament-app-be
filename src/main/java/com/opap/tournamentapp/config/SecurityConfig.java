@@ -63,11 +63,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/oauth/login/google","/oauth/login/github","/loggedin/**", "/admin/**","/ws-message/**","/login","/register","/auth").permitAll()
                 .anyRequest().authenticated()
-//                .and()
-//                .formLogin().loginProcessingUrl("/auth").permitAll()
                 .and()
                 .oauth2Login()
                 .defaultSuccessUrl("/oauth/login/success", true)
+                .and()
+                .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
                 .and()
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -111,11 +115,6 @@ public class SecurityConfig {
             return user;
         };
     }
-
-
-
-
-
 
     @Bean
     public WebClient rest(ClientRegistrationRepository clients, OAuth2AuthorizedClientRepository authz) {

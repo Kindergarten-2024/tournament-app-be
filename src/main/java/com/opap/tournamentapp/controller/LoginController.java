@@ -5,13 +5,16 @@ import com.opap.tournamentapp.dto.CheckLoginResponseDTO;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.AuthService;
 import com.opap.tournamentapp.service.UserService;
+import com.opap.tournamentapp.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +32,14 @@ import java.util.Map;
 public class LoginController {
     private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
     private final AuthService authService;
+
+    private final JwtUtil jwtUtil;
     private final UserService userService;
     private final String frontendUrl;
 
-    public LoginController(AuthService authService, UserService userService,@Value("${frontendUrl:http://localhost:3000}") String frontendUrl ){
+    public LoginController(AuthService authService, JwtUtil jwtUtil, UserService userService, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl ){
         this.authService=authService;
+        this.jwtUtil = jwtUtil;
         this.userService = userService;
         this.frontendUrl = frontendUrl;
     }
@@ -99,6 +106,8 @@ public class LoginController {
     public ResponseEntity<CheckLoginResponseDTO> loggedIn() {
         CacheControl cacheControl = CacheControl.noStore().mustRevalidate();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        LOGGER.info("sEcUrItY-Context HOOLDLERLER!@! - {}", SecurityContextHolder.getContext().getAuthentication());
+
 
         // Check if the user is authenticated and not anonymous
         if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated()) {
@@ -107,13 +116,11 @@ public class LoginController {
                 // Handle OAuth2 user details
                 OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
                 user = authService.userMap(oauthToken);
-                LOGGER.info("OAuth2 Authentication: User details - {}", user);
             } else if (authentication.getPrincipal() instanceof UserDetails) {
                 // Handle custom user details
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                user.put("username", userDetails.getUsername());
-                // Add more user details as needed
-                LOGGER.info("Custom Authentication: User details - {}", user);
+                user.put("email", userDetails.getUsername());
+
             }
 
             CheckLoginResponseDTO response = new CheckLoginResponseDTO(true, user);
@@ -128,23 +135,5 @@ public class LoginController {
                     .cacheControl(cacheControl)
                     .body(response);
         }
-    }
-
-
-    /**
-     * <h2> Logout </h2>
-     *
-     *  Basic logout functionality, by clearing Session from the Http Request.
-     *  User redirected to ReactJS login page.
-     *
-     * @param request The HttpServletRequest of current user's session
-     * @return A new ResponseEntity with a 200 (OK) status code and response body with the String "Logged out successfully"
-     */
-    @PostMapping("/oauth/logout")
-    public ResponseEntity<String> logout (HttpServletRequest request, OAuth2AuthenticationToken token) throws JsonProcessingException {
-        request.getSession(false).invalidate();
-        User user = authService.getUserFromAuthenticationToken(token);
-        userService.logoutUser(user.getUsername());
-        return ResponseEntity.ok("Logged out successfully");
     }
 }

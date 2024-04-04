@@ -55,7 +55,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 logger.error("Malformed JWT token", e);
                 // Handle malformed token case
             }
-            // Other exceptions...
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

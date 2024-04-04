@@ -1,11 +1,13 @@
 package com.opap.tournamentapp.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.opap.tournamentapp.controller.LoginController;
 import com.opap.tournamentapp.dto.TextMessageDTO;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.repository.UserRepository;
 import com.opap.tournamentapp.util.JwtUtil;
+import org.apache.juli.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +17,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Text;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,11 +40,17 @@ public class UserService {
 
 
     @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     private static final Logger logger= LogManager.getLogger(UserService.class);
 
     SimpMessagingTemplate simpMessagingTemplate;
+    private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
+
 
 
     public UserService(SimpMessagingTemplate simpMessagingTemplate,KafkaProducer producer, UserRepository userRepository, PasswordEncoder passwordEncoder) {
@@ -59,15 +70,17 @@ public class UserService {
             userRepository.save(user);
         }
         User user=findByUsername(username);
+        postLoginActions(user);
+    }
+
+    public void postLoginActions(User user) throws JsonProcessingException {
         TextMessageDTO textMessageDTO = new TextMessageDTO();
-        textMessageDTO.setMessage(user.getUsername() + " "+ "registered");
+        textMessageDTO.setMessage(user.getUsername() + " " + (user.getRegistered() ? "logged in" : "registered"));
         producer.sendMessage("logs",textMessageDTO);
-        userRepository.save(user);
-        //also sending leaderboard when someone register
         List<User> descPlayerList = findAllByDescScore();
-        if (descPlayerList != null && !descPlayerList.isEmpty()) {
+        if (descPlayerList != null && !descPlayerList.isEmpty()){
             simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
-            logger.info("Sending to /leaderboard");
+            logger.info("Sending to leaderboard");
         }
     }
 
@@ -79,6 +92,7 @@ public class UserService {
             if (passwordEncoder.matches(password, user.getPassword())) {
                 // Password matches, proceed with login-specific actions
                 String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(email, user.getPassword())); //might need to add user.getAuthorities()
+                postLoginActions(user);
                 return ResponseEntity.ok(Map.of("message", "User logged in successfully", "token", token));
             } else {
                 // Password does not match
@@ -87,15 +101,18 @@ public class UserService {
         } else {
             // No user found, proceed with registration
             user = new User();
-            user.setUsername(username);
+            user.setUsername(email);
             user.setEmail(email);
             user.setFullName(fullName);
             user.setPassword(passwordEncoder.encode(password));
             user.setRegistered(true);
             userRepository.save(user);
 
+            authenticateUserAndSetContext(user.getEmail(), password);
+
             // After registration, generate token
             String token = jwtUtil.generateToken(new UsernamePasswordAuthenticationToken(email, user.getPassword()));
+            postLoginActions(user);
 
             // Registration-specific actions here, e.g., sending a welcome email
 
@@ -103,21 +120,21 @@ public class UserService {
         }
     }
 
-
-
-    public User findingByEmail(String email){
-        return userRepository.findByEmail(email);
+    private void authenticateUserAndSetContext(String email, String password) {
+        LOGGER.info("im in authenticateUserAndSetContext ");
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        LOGGER.info(SecurityContextHolder.getContext());
     }
 
-    public void logoutUser(String username) throws JsonProcessingException {
-        Optional<User> user = Optional.ofNullable(userRepository.findByUsername(username));
-        if (user.isPresent()) {
-            user.get().setRegistered(false);
-            TextMessageDTO textMessageDTO = new TextMessageDTO();
-            textMessageDTO.setMessage(user.get().getUsername()+" " + "unregistered");
-            producer.sendMessage("logs",textMessageDTO);
-            userRepository.save(user.get());
-        }
+    public User findByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
+    public Long findUserIdByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        return user != null ? user.getId() : null;
     }
 
     public int findPlayerPosition(User user) {

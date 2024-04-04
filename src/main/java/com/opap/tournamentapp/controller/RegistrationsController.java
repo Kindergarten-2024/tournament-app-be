@@ -2,14 +2,12 @@ package com.opap.tournamentapp.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.dto.CheckRegistrationsTimeDTO;
-import com.opap.tournamentapp.dto.RegistrationDto;
+import com.opap.tournamentapp.dto.RegistrationDTO;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.AuthService;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
 import com.opap.tournamentapp.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,8 +41,10 @@ public class RegistrationsController {
         this.passwordEncoder = passwordEncoder;
 
     }
+
+
     @PostMapping("/auth")
-    public ResponseEntity<?> authenticateOrRegisterUser(@RequestBody RegistrationDto registrationDto) throws JsonProcessingException {
+    public ResponseEntity<?> authenticateOrRegisterUser(@RequestBody RegistrationDTO registrationDto) throws JsonProcessingException {
         return userService.loginUserOrRegister(
                 registrationDto.getFullName(),
                 registrationDto.getUsername(),
@@ -184,17 +184,4 @@ public class RegistrationsController {
         }
     }
 
-//    @PostMapping("/admin/end-date")
-//    public ResponseEntity<String> setEndDate(@RequestBody Map<String, String> payload) {
-//        String newEndDate = payload.get("newEndDate");
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-//
-//        try {
-//            LocalDateTime parsedEndDate = LocalDateTime.parse(newEndDate, formatter);
-//            registrationsTimeService.setRegistrationsEndTime(parsedEndDate);
-//            return ResponseEntity.ok(newEndDate);
-//        } catch (DateTimeParseException error) {
-//            return ResponseEntity.badRequest().body("Invalid date format, with error: " + error);
-//        }
-//    }
 }

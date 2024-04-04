@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class RegistrationDto {
+public class RegistrationDTO {
 
     @NotBlank(message = "Full name is required")
     private String fullName;
@@ -21,7 +21,7 @@ public class RegistrationDto {
     private String password;
 
     // Default constructor
-    public RegistrationDto() {}
+    public RegistrationDTO() {}
 
     // Getters and setters
 
