@@ -163,7 +163,7 @@ public class UserAnswerService {
                 else if(Objects.equals(item,"freeze") && enemy.getFreeze_debuff()<2){
                         String destination = "/user/" + enemy.getUsername() + "/private";
                         enemy.increaseFreezeDebuff();
-                        simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername()+ " used freeze power on you");
+                        simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername());
                         userRepository.save(enemy);
                     }
                 user.setItem(null); //used his item so reset it
