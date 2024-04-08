@@ -22,6 +22,8 @@ public class User {
 
     private int correctAnswerStreak;
 
+    private int multiplierStreak;
+
     private String item;
     private String fcmToken;
 
@@ -32,7 +34,7 @@ public class User {
         this.userId = userId;
     }
 
-    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item,int freeze_debuff,boolean mask_debuff) {
+    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item,int freeze_debuff,boolean mask_debuff,int multiplierStreak) {
         this.fullName = fullName;
         this.username = username;
         this.registered = registered;
@@ -42,6 +44,7 @@ public class User {
         this.freeze_debuff=freeze_debuff;
         this.mask_debuff=mask_debuff;
         this.fcmToken = null;
+        this.multiplierStreak=multiplierStreak;
     }
 
     public void setItem(String item){
@@ -53,6 +56,14 @@ public class User {
     }
     public void setCorrectAnswerStreak(int correctAnswerStreak) {
         this.correctAnswerStreak = correctAnswerStreak;
+    }
+
+    public void setMultiplierStreak(int multiplierStreak){
+        this.multiplierStreak=multiplierStreak;
+    }
+
+    public int getMultiplierStreak(){
+        return multiplierStreak;
     }
 
     public int getCorrectAnswerStreak() {

@@ -37,7 +37,7 @@ public class UserService {
     public void loginUser(String fullName, String username, String avatarUrl, int streak,String item) throws JsonProcessingException {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
         if (userOptional.isEmpty())
-            userRepository.save(new User(fullName, username, true, avatarUrl, streak,item,0,false));
+            userRepository.save(new User(fullName, username, true, avatarUrl, 0,item,0,false,0));
         else {
             User user = userOptional.get();
             user.setRegistered(true);
@@ -100,6 +100,8 @@ public class UserService {
     public int findPlayerStreak(User user){
         return user.getCorrectAnswerStreak();
     }
+
+    public int findPlayerMultiplier(User user){return user.getMultiplierStreak(); }
 
     // LeaderBoard
     public List<User> findAllByDescScore() {

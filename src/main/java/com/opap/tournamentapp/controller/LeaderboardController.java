@@ -47,7 +47,7 @@ public class LeaderboardController {
     @GetMapping("/player-streak")
     public ResponseEntity<Integer> sendPlayerStreak(OAuth2AuthenticationToken token){
         User user = authService.getUserFromAuthenticationToken(token);
-        return ResponseEntity.ok(userService.findPlayerStreak(user));
+        return ResponseEntity.ok(userService.findPlayerMultiplier(user));
     }
     }
 

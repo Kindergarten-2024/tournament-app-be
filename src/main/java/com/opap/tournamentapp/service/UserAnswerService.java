@@ -98,13 +98,14 @@ public class UserAnswerService {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
+            user.setMultiplierStreak(user.getMultiplierStreak()+1);
             // boost is basically double points for correct answer >=3 and triple on >=5 also win an power
             if (user.getCorrectAnswerStreak() > 0 ){
                 obtainPower(user); //obtain power depending on streak
-                if (user.getCorrectAnswerStreak() >= 5) { //5+
+                if (user.getMultiplierStreak() >= 5) { //5+
                     user.setScore((user.getScore() + 3));
                 }
-                else if(user.getCorrectAnswerStreak() >=3){ //3-4
+                else if(user.getMultiplierStreak() >=3){ //3-4
                 user.setScore(user.getScore() +2 );
                 }
                 else{
@@ -118,6 +119,7 @@ public class UserAnswerService {
         else{
             assert user != null;
             user.setCorrectAnswerStreak(0);
+            user.setMultiplierStreak(0);
             user.setItem("null");
         }
         userRepository.save(user);
@@ -170,6 +172,7 @@ public class UserAnswerService {
                         userRepository.save(enemy);
                     }
                 user.setItem(null); //used his item so reset it
+                user.setCorrectAnswerStreak(0);
                 userRepository.save(user);
                 List<User> descPlayerList = userService.findAllByDescScore();
                 simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
