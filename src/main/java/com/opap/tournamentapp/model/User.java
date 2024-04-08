@@ -25,6 +25,8 @@ public class User {
     private String item;
     private String fcmToken;
 
+    private String debuffAtm;
+
 
     public User () { }
 
@@ -32,7 +34,7 @@ public class User {
         this.userId = userId;
     }
 
-    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item,int freeze_debuff,boolean mask_debuff) {
+    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item,int freeze_debuff,boolean mask_debuff,String debuffAtm) {
         this.fullName = fullName;
         this.username = username;
         this.registered = registered;
@@ -42,6 +44,7 @@ public class User {
         this.freeze_debuff=freeze_debuff;
         this.mask_debuff=mask_debuff;
         this.fcmToken = null;
+        this.debuffAtm=debuffAtm;
     }
 
     public void setItem(String item){
@@ -80,6 +83,14 @@ public class User {
     }
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public void setDebuffAtm(String debuffAtm){
+        this.debuffAtm=debuffAtm;
+    }
+
+    public String getDebuffAtm(){
+        return debuffAtm;
     }
 
     public Long getId() {return userId;}

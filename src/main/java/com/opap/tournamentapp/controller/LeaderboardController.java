@@ -49,6 +49,12 @@ public class LeaderboardController {
         User user = authService.getUserFromAuthenticationToken(token);
         return ResponseEntity.ok(userService.findPlayerStreak(user));
     }
+
+    @GetMapping("/player-debuff")
+    public ResponseEntity<String> sendPlayerDebuff(OAuth2AuthenticationToken token){
+        User user = authService.getUserFromAuthenticationToken(token);
+        return ResponseEntity.ok(userService.findPlayerDebuffAtm(user));
+    }
     }
 
 

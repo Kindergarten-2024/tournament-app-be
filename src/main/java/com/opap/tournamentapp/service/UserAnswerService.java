@@ -155,6 +155,7 @@ public class UserAnswerService {
                     enemy.setMask_debuff(true);
                     user.setScore(user.getScore() + stolenPointsInt);
                     user.setItem(null); //used his item so reset it
+                    enemy.setDebuffAtm("mask");
                     //save users
                     userRepository.save(enemy);
                     //also sending leaderboard to update with new points
@@ -167,8 +168,12 @@ public class UserAnswerService {
                         String destination = "/user/" + enemy.getUsername() + "/private";
                         enemy.increaseFreezeDebuff();
                         simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername());
+                        enemy.setDebuffAtm("freeze");
                         userRepository.save(enemy);
                     }
+                else{
+                    user.setDebuffAtm("5050"); //if not freeze or mask used, its 50-50 no other choices
+                }
                 user.setItem(null); //used his item so reset it
                 userRepository.save(user);
                 List<User> descPlayerList = userService.findAllByDescScore();
