@@ -34,10 +34,10 @@ public class UserService {
         this.simpMessagingTemplate=simpMessagingTemplate;
     }
 
-    public void loginUser(String fullName, String username, String avatarUrl, int streak,String item) throws JsonProcessingException {
+    public void loginUser(String fullName, String username, String avatarUrl) throws JsonProcessingException {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
         if (userOptional.isEmpty())
-            userRepository.save(new User(fullName, username, true, avatarUrl, streak,item,0,false));
+            userRepository.save(new User(fullName, username, true, avatarUrl, 0,null,0,false,null));
         else {
             User user = userOptional.get();
             user.setRegistered(true);
@@ -95,6 +95,10 @@ public class UserService {
 
     public String findPlayerItem(User user){
         return user.getItem();
+    }
+
+    public String findPlayerDebuffAtm(User user){
+        return user.getDebuffAtm();
     }
 
     public int findPlayerStreak(User user){
@@ -156,6 +160,14 @@ public class UserService {
         List<User> users= getAllUsers();
         for (User user:users){
             user.setMask_debuff(false);
+            userRepository.save(user);
+        }
+    }
+
+    public void resetDebuffAtm(){
+        List<User> users=getAllUsers();
+        for (User user:users){
+            user.setDebuffAtm(null);
             userRepository.save(user);
         }
     }
