@@ -150,15 +150,18 @@ public class UserAnswerService {
                 {
                     double stolenPoints=enemy.getScore()/4.0;
                     stolenPoints = Math.ceil(stolenPoints);;
-                    enemy.setScore((int) (enemy.getScore() - stolenPoints)); //losing the 1/4 of the points,todo modify it
+                    int stolenPointsInt = (int) stolenPoints;
+                    enemy.setScore(enemy.getScore() - stolenPointsInt); //losing the 1/4 of the points,todo modify it
                     enemy.setMask_debuff(true);
-                    user.setScore((int) (user.getScore() + stolenPoints));
+                    user.setScore(user.getScore() + stolenPointsInt);
                     user.setItem(null); //used his item so reset it
                     //save users
                     userRepository.save(enemy);
                     //also sending leaderboard to update with new points
                     String destination = "/user/" + enemy.getUsername() + "/private";
-                    simpMessagingTemplate.convertAndSend(destination, user.getUsername()+ " used mask power on you");
+                    String source = "/user/" + user.getUsername() + "/private";
+                    simpMessagingTemplate.convertAndSend(destination, user.getUsername() + " used mask power on you:" + stolenPointsInt);
+                    simpMessagingTemplate.convertAndSend(source, user.getUsername() + " using mask power:" + stolenPointsInt);
                 }
                 else if(Objects.equals(item,"freeze") && enemy.getFreeze_debuff()<2){
                         String destination = "/user/" + enemy.getUsername() + "/private";
