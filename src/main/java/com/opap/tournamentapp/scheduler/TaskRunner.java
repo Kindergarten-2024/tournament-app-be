@@ -73,7 +73,7 @@ public class TaskRunner {
         logger.info("Task Executed");
         try {
             questionNumber++;
-            userService.resetDebuffAtm();
+            //userService.resetDebuffAtm();
             // int 5 for sending 4 questions in each round
             if (questionNumber == 11 && round == 1) {
                 updateRoundsAndTime();
