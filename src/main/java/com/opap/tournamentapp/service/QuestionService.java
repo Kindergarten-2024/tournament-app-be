@@ -22,6 +22,9 @@ public class QuestionService {
 
     private final UserService userService;
 
+    Question currentQuestion;
+    Question previousQuestion;
+
     private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
     public QuestionService(QuestionRepository questionRepository, SimpMessagingTemplate simpMessagingTemplate, UserService userService){
         this.questionRepository=questionRepository;
@@ -30,13 +33,13 @@ public class QuestionService {
     }
 
     public void updateCurrentQuestion(int questionNumber) {
-       Question currentQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
+       currentQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
        currentQuestion.setCurrentQuestion(true);
        questionRepository.save(currentQuestion);
 
        questionNumber = questionNumber - 1;
        if (questionNumber > 0) {
-           Question previousQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
+           previousQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
            previousQuestion.setCurrentQuestion(false);
            questionRepository.save(previousQuestion);
        }

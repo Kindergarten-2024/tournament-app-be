@@ -30,8 +30,10 @@ public class TaskRunner {
     private final TaskScheduler taskScheduler;
     private final RegistrationsTimeService registrationsTimeService;
     final UserService userService;
+    QuestionDTO dto = new QuestionDTO();
 
     private int questionNumber = 0;
+    Question currentQuestion;
     private boolean isSchedulerActive = false;
 
     /**
@@ -73,7 +75,7 @@ public class TaskRunner {
         logger.info("Task Executed");
         try {
             questionNumber++;
-            //userService.resetDebuffAtm();
+            userService.resetDebuffAtm();
             // int 5 for sending 4 questions in each round
             if (questionNumber == 11 && round == 1) {
                 updateRoundsAndTime();
@@ -86,10 +88,15 @@ public class TaskRunner {
                 stopScheduler();
             }
             else {
-                Question currentQuestion = questionService.getQuestionByOrder(questionNumber);
+                currentQuestion = questionService.getQuestionByOrder(questionNumber);
 
                 if (currentQuestion != null) {
-                    QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), questionNumber);
+                    dto.setQuestion(currentQuestion.getQuestion());
+                    dto.setOptions(currentQuestion.getOptions());
+                    dto.setId(currentQuestion.getQuestionId());
+                    dto.setTime(currentQuestion.getTimeSent());
+                    dto.setAnswer(EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()));
+                    dto.setQuestionNumber(questionNumber);
                     kafkaProducer.sendQuestion("questions", dto);
                     questionService.updateCurrentQuestion(questionNumber);
                 }
