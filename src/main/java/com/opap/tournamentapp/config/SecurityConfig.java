@@ -140,7 +140,7 @@ public class SecurityConfig {
                 avatarUrl = oidcUser.getAttribute("picture");
                 logger.info("LinkedIn user details: Fullname: " + fullname + ", Email: " + email);
                 try {
-                    userService.loginUser(fullname, email, avatarUrl, 0, null);
+                    userService.loginUser(fullname, email, avatarUrl);
                 } catch (JsonProcessingException e) {
                     logger.error("Error processing user details: " + e.getMessage(), e);
                     throw new RuntimeException(e);
