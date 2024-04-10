@@ -4,26 +4,43 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
+import java.util.*;
 
 @Configuration
 @EnableWebSecurity
@@ -35,35 +52,13 @@ public class SecurityConfig {
         this.userService=userService;
     }
 
-    // H2 config
-//    @Bean
-//    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl)
-//            throws Exception {
-//        http
-//                .csrf().disable()
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl))) // Using frontendUrl
-//                .authorizeHttpRequests(authz -> authz
-//                        .requestMatchers(new AntPathRequestMatcher("/oauth/login/google")).permitAll()
-//                        .requestMatchers(new AntPathRequestMatcher("/oauth/login/github")).permitAll()
-//                        .requestMatchers(new AntPathRequestMatcher("/loggedin/**")).permitAll()
-//                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).permitAll()
-//                        .requestMatchers(new AntPathRequestMatcher("/ws-message/**")).permitAll()
-//                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .oauth2Login(oauth -> oauth
-//                        .defaultSuccessUrl("/oauth/login/success", true)
-//                )
-//                .headers(headers -> headers
-//                        .frameOptions().sameOrigin() // Allow frames for the H2 console
-//                );
-//
-//        return http.build();
-//    }
-
-    // PostgreSQL config
     @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl) throws Exception {
+    public CustomFilter customFilter(){
+        return new CustomFilter();
+    }
+    @Bean
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${frontendUrl:http://localhost:3000}") String frontendUrl,CustomFilter customFilter) throws Exception {
+        http.addFilterBefore(customFilter, OAuth2LoginAuthenticationFilter.class);
         http
                 .csrf().disable()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
@@ -73,11 +68,10 @@ public class SecurityConfig {
                 .and()
                 .oauth2Login()
                 .loginPage("/redirect")
-                .defaultSuccessUrl("/oauth/login/success", true);
+                .defaultSuccessUrl("/oauth/login/success");
         return http.build();
     }
 
-    // @Bean
     CorsConfigurationSource corsConfigurationSource(String frontendUrl) {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of( frontendUrl));
@@ -88,12 +82,17 @@ public class SecurityConfig {
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
         return urlBasedCorsConfigurationSource;
     }
+
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(WebClient rest) {
         DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+        logger.info("IM IN SEC CONFIG OAUTH2SUSERSEREIVECCECEFERWERFDSDF");
         return request -> {
+
             OAuth2User user = delegate.loadUser(request);
+            logger.info("FIND ME FOR CRYING OUT LOUD!!!" + user);
             String registrationId = request.getClientRegistration().getRegistrationId();
+            logger.info("what is happening holmes: " + registrationId);
             OAuth2AuthorizedClient client = new OAuth2AuthorizedClient(request.getClientRegistration(), user.getName(), request.getAccessToken());
             String fullname, username, avatarUrl;
 
@@ -101,13 +100,15 @@ public class SecurityConfig {
                 fullname = user.getAttribute("name");
                 username = user.getAttribute("login");
                 avatarUrl = user.getAttribute("avatar_url");
-            } else if ("linkedin".equals(registrationId)) {
+            } else {
                 fullname = user.getAttribute("name");
                 username = user.getAttribute("email");
                 avatarUrl = user.getAttribute("picture");
-            } else {
-                throw new IllegalArgumentException("Unsupported OAuth2 provider: " + registrationId);
+                logger.info("1234123412 !!! IN SEC CONFIG22341@#$!" + user);
             }
+//            } else {
+//                throw new IllegalArgumentException("Unsupported OAuth2 provider: " + registrationId);
+//            }
 
             logger.info("Fullname: " + fullname + " Username: " + username);
 
@@ -120,6 +121,38 @@ public class SecurityConfig {
             return user;
         };
     }
+
+
+    @Bean
+    public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
+        OidcUserService delegate = new OidcUserService();
+        return request -> {
+            OidcUser user = delegate.loadUser(request);
+            logger.info("OIDC User: " + user);
+            String registrationId = request.getClientRegistration().getRegistrationId();
+            logger.info("Registration ID: " + registrationId);
+
+            String fullname, email, avatarUrl;
+            if ("linkedin".equals(registrationId) && user instanceof OidcUser) {
+                OidcUser oidcUser = user;
+                fullname = oidcUser.getAttribute("name");
+                email = oidcUser.getAttribute("email");
+                avatarUrl = oidcUser.getAttribute("picture");
+                logger.info("LinkedIn user details: Fullname: " + fullname + ", Email: " + email);
+                try {
+                    userService.loginUser(fullname, email, avatarUrl, 0, null);
+                } catch (JsonProcessingException e) {
+                    logger.error("Error processing user details: " + e.getMessage(), e);
+                    throw new RuntimeException(e);
+                }
+            }
+
+
+            return (OidcUser) user;
+        };
+    }
+
+
 
     @Bean
     public WebClient rest(ClientRegistrationRepository clients, OAuth2AuthorizedClientRepository authz) {

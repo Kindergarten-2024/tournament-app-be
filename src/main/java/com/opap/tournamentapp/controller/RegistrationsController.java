@@ -165,18 +165,4 @@ public class RegistrationsController {
             return ResponseEntity.badRequest().body("Invalid date format, with error: " + error);
         }
     }
-
-//    @PostMapping("/admin/end-date")
-//    public ResponseEntity<String> setEndDate(@RequestBody Map<String, String> payload) {
-//        String newEndDate = payload.get("newEndDate");
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-//
-//        try {
-//            LocalDateTime parsedEndDate = LocalDateTime.parse(newEndDate, formatter);
-//            registrationsTimeService.setRegistrationsEndTime(parsedEndDate);
-//            return ResponseEntity.ok(newEndDate);
-//        } catch (DateTimeParseException error) {
-//            return ResponseEntity.badRequest().body("Invalid date format, with error: " + error);
-//        }
-//    }
 }
