@@ -121,12 +121,11 @@ public class TaskRunner {
      * <p>stop's the scheduler if needed in</p>
      */
     private void stopScheduler() {
-        synchronized (lock) {
             if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
                 logger.info("Scheduler Stopped");
                 scheduledFuture.cancel(true);
                 isSchedulerActive = false;
             }
-        }
+
     }
 }
