@@ -95,7 +95,7 @@ public class UserAnswerService {
      * @param isCorrect His answer is correct or wrong.
      */
     private void updateUserScore(Long userId, boolean isCorrect) {
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findUserByUserId(userId);
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
             // boost is basically double points for correct answer >=3 and triple on >=5 also win an power
