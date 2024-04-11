@@ -63,7 +63,10 @@ public class TaskRunner {
      * <p>start's the scheduler when it needs to in</p>
      */
     public void startScheduler(int round) {
-        scheduledFuture = taskScheduler.scheduleWithFixedDelay(() -> executeTask(round), Duration.ofSeconds(20));
+        synchronized (lock) {
+            scheduledFuture = taskScheduler.scheduleWithFixedDelay(() -> executeTask(round), Duration.ofSeconds(20));
+            isSchedulerActive =true;
+        }
     }
 
     /**
@@ -77,7 +80,6 @@ public class TaskRunner {
         logger.info("Task Executed");
         try {
 
-            synchronized (lock) {
                 questionNumber++;
                 userService.resetDebuffAtm();
                 // int 5 for sending 4 questions in each round
@@ -100,7 +102,7 @@ public class TaskRunner {
                         questionService.updateCurrentQuestion(questionNumber);
                     }
                 }
-            }
+
         } catch (JsonProcessingException e) {
             logger.error("Task interrupted " + e.getMessage(), e);
         } catch (Exception e) {
@@ -121,11 +123,12 @@ public class TaskRunner {
      * <p>stop's the scheduler if needed in</p>
      */
     private void stopScheduler() {
+        synchronized (lock) {
             if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
                 logger.info("Scheduler Stopped");
                 scheduledFuture.cancel(true);
                 isSchedulerActive = false;
             }
-
+        }
     }
 }
