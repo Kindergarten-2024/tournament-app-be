@@ -83,6 +83,7 @@ public class TaskRunner {
                 // int 5 for sending 4 questions in each round
                 if (questionNumber == 11 && round == 1) {
                     updateRoundsAndTime();
+
                     questionService.updateCurrentQuestion(questionNumber);
                     questionNumber--;
                     stopScheduler();
