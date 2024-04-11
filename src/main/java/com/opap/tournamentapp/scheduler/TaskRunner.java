@@ -65,7 +65,7 @@ public class TaskRunner {
     public void startScheduler(int round) {
         LocalDateTime now = LocalDateTime.now();
         Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
-        IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(round), instant.plusSeconds(i* 20L)));
+        IntStream.range(1,12).forEach(i -> taskScheduler.schedule(() -> executeTask(round), instant.plusSeconds(i* 20L)));
     }
 
     /**
