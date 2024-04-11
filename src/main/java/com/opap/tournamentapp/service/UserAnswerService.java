@@ -138,7 +138,7 @@ public class UserAnswerService {
     }
 
     public void usePower(Long userId,String item,Long enemyId) {
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findUserByUserId(userId);
         User enemy=userRepository.findUserByUserId(enemyId);
         logger.info(item);
         logger.info(user);
@@ -148,15 +148,13 @@ public class UserAnswerService {
                 logger.info(item);
                 if(Objects.equals(item, "mask") && !enemy.getMask_debuff()) //if the power is mask
                 {
+                    enemy.setMask_debuff(true);
+                    enemy.setDebuffAtm("mask");
                     double stolenPoints=enemy.getScore()/4.0;
                     stolenPoints = Math.ceil(stolenPoints);;
                     int stolenPointsInt = (int) stolenPoints;
                     enemy.setScore(enemy.getScore() - stolenPointsInt); //losing the 1/4 of the points,todo modify it
-                    enemy.setMask_debuff(true);
                     user.setScore(user.getScore() + stolenPointsInt);
-                    user.setItem(null); //used his item so reset it
-                    enemy.setDebuffAtm("mask");
-                    //save users
                     userRepository.save(enemy);
                     //also sending leaderboard to update with new points
                     String destination = "/user/" + enemy.getUsername() + "/private";
