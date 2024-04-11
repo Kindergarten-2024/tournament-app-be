@@ -36,6 +36,8 @@ public class TaskRunner {
     Question currentQuestion;
     private boolean isSchedulerActive = false;
 
+    private final Object lock = new Object();
+
     /**
      * Initializes a new instance of {@code TaskRunner}.
      * <p>
@@ -74,31 +76,28 @@ public class TaskRunner {
     private void executeTask(int round) {
         logger.info("Task Executed");
         try {
-            questionNumber++;
-            userService.resetDebuffAtm();
-            // int 5 for sending 4 questions in each round
-            if (questionNumber == 11 && round == 1) {
-                updateRoundsAndTime();
-                questionService.updateCurrentQuestion(questionNumber);
-                questionNumber--;
-                stopScheduler();
-            } else if (questionNumber == 21 && round == 2) {
-                questionNumber=0;
-                updateRoundsAndTime();
-                stopScheduler();
-            }
-            else {
-                currentQuestion = questionService.getQuestionByOrder(questionNumber);
 
-                if (currentQuestion != null) {
-                    dto.setQuestion(currentQuestion.getQuestion());
-                    dto.setOptions(currentQuestion.getOptions());
-                    dto.setId(currentQuestion.getQuestionId());
-                    dto.setTime(currentQuestion.getTimeSent());
-                    dto.setAnswer(EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()));
-                    dto.setQuestionNumber(questionNumber);
-                    kafkaProducer.sendQuestion("questions", dto);
+            synchronized (lock) {
+                questionNumber++;
+                userService.resetDebuffAtm();
+                // int 5 for sending 4 questions in each round
+                if (questionNumber == 11 && round == 1) {
+                    updateRoundsAndTime();
                     questionService.updateCurrentQuestion(questionNumber);
+                    questionNumber--;
+                    stopScheduler();
+                } else if (questionNumber == 21 && round == 2) {
+                    questionNumber=0;
+                    updateRoundsAndTime();
+                    stopScheduler();
+                } else {
+                    Question currentQuestion = questionService.getQuestionByOrder(questionNumber);
+
+                    if (currentQuestion != null) {
+                        QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), questionNumber);
+                        kafkaProducer.sendQuestion("questions", dto);
+                        questionService.updateCurrentQuestion(questionNumber);
+                    }
                 }
             }
         } catch (JsonProcessingException e) {
@@ -121,10 +120,12 @@ public class TaskRunner {
      * <p>stop's the scheduler if needed in</p>
      */
     private void stopScheduler() {
-        if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
-            logger.info("Scheduler Stopped");
-            scheduledFuture.cancel(true);
-            isSchedulerActive = false;
+        synchronized (lock) {
+            if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
+                logger.info("Scheduler Stopped");
+                scheduledFuture.cancel(true);
+                isSchedulerActive = false;
+            }
         }
     }
 }
