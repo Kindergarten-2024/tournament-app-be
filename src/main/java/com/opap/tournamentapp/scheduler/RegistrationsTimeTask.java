@@ -17,9 +17,7 @@ import java.time.ZonedDateTime;
 
 @Service
 public class RegistrationsTimeTask {
-
     private static final Logger logger=LogManager.getLogger(RegistrationsTime.class);
-
     final RegistrationsTimeService registrationsTimeService;
     final SimpMessagingTemplate simpMessagingTemplate;
     private final FirebaseMessagingService firebaseMessagingService;
