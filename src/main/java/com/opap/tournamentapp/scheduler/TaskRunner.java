@@ -16,7 +16,11 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.IntStream;
 
 @Service
 @EnableScheduling
@@ -59,7 +63,9 @@ public class TaskRunner {
      * <p>start's the scheduler when it needs to in</p>
      */
     public void startScheduler(int round) {
-        scheduledFuture = taskScheduler.scheduleWithFixedDelay(() -> executeTask(round), Duration.ofSeconds(20));
+        LocalDateTime now = LocalDateTime.now();
+        Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
+        IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(round), instant.plusSeconds(i* 20L)));
     }
 
     /**
@@ -73,17 +79,15 @@ public class TaskRunner {
         logger.info("Task Executed");
         try {
             questionNumber++;
-            //userService.resetDebuffAtm();
+            userService.resetDebuffAtm();
             // int 5 for sending 4 questions in each round
             if (questionNumber == 11 && round == 1) {
                 updateRoundsAndTime();
                 questionService.updateCurrentQuestion(questionNumber);
                 questionNumber--;
-                stopScheduler();
             } else if (questionNumber == 21 && round == 2) {
                 questionNumber=0;
                 updateRoundsAndTime();
-                stopScheduler();
             }
             else {
                 Question currentQuestion = questionService.getQuestionByOrder(questionNumber);
@@ -106,18 +110,5 @@ public class TaskRunner {
      */
     private void updateRoundsAndTime() {
         registrationsTimeService.setRegistrationRoundsAndNextQuizStartTime();
-    }
-
-    /**
-     * <h2> Stop Scheduler </h2>
-     *
-     * <p>stop's the scheduler if needed in</p>
-     */
-    private void stopScheduler() {
-        if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
-            logger.info("Scheduler Stopped");
-            scheduledFuture.cancel(true);
-            isSchedulerActive = false;
-        }
     }
 }
