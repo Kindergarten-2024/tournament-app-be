@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 @Service
@@ -35,8 +36,7 @@ public class TaskRunner {
     private final RegistrationsTimeService registrationsTimeService;
     final UserService userService;
 
-    private int questionNumber = 0;
-    private boolean isSchedulerActive = false;
+    private final AtomicInteger questionNumber = new AtomicInteger(0);
 
     /**
      * Initializes a new instance of {@code TaskRunner}.
@@ -65,7 +65,7 @@ public class TaskRunner {
     public void startScheduler(int round) {
         LocalDateTime now = LocalDateTime.now();
         Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
-        IntStream.range(1,12).forEach(i -> taskScheduler.schedule(() -> executeTask(round), instant.plusSeconds(i* 20L)));
+        IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(round), instant.plusSeconds(5 + (i * 20L))));
     }
 
     /**
@@ -78,24 +78,23 @@ public class TaskRunner {
     private void executeTask(int round) {
         logger.info("Task Executed");
         try {
-            questionNumber++;
+            questionNumber.incrementAndGet();
             userService.resetDebuffAtm();
-            // int 5 for sending 4 questions in each round
-            if (questionNumber == 11 && round == 1) {
+            if (questionNumber.get() == 11 && round == 1) {
                 updateRoundsAndTime();
-                questionService.updateCurrentQuestion(questionNumber);
-                questionNumber--;
-            } else if (questionNumber == 21 && round == 2) {
-                questionNumber=0;
+                questionService.updateCurrentQuestion(questionNumber.get());
+                questionNumber.decrementAndGet();
+            } else if (questionNumber.get() == 21 && round == 2) {
+                questionNumber.getAndSet(0);
                 updateRoundsAndTime();
             }
             else {
-                Question currentQuestion = questionService.getQuestionByOrder(questionNumber);
+                Question currentQuestion = questionService.getQuestionByOrder(questionNumber.get());
 
                 if (currentQuestion != null) {
-                    QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), questionNumber);
+                    QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), questionNumber.get());
                     kafkaProducer.sendQuestion("questions", dto);
-                    questionService.updateCurrentQuestion(questionNumber);
+                    questionService.updateCurrentQuestion(questionNumber.get());
                 }
             }
         } catch (JsonProcessingException e) {
