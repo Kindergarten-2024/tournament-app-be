@@ -15,12 +15,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -31,12 +32,10 @@ public class TaskRunner {
 
     private final QuestionService questionService;
     private final KafkaProducer kafkaProducer;
-    private ScheduledFuture<?> scheduledFuture;
+    private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
     private final TaskScheduler taskScheduler;
     private final RegistrationsTimeService registrationsTimeService;
     final UserService userService;
-
-    private final AtomicInteger questionNumber = new AtomicInteger(0);
 
     /**
      * Initializes a new instance of {@code TaskRunner}.
@@ -65,7 +64,15 @@ public class TaskRunner {
     public void startScheduler(int round) {
         LocalDateTime now = LocalDateTime.now();
         Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
-        IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(round), instant.plusSeconds(5 + (i * 20L))));
+        if(round == 1) {
+            List<Question> questions = IntStream.range(1, 12).mapToObj(questionService::getQuestionByOrder).toList();
+            IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(i+1, questions.get(i)), instant.plusSeconds(3 + (i * 20L))));
+        } else if (round == 2) {
+            List<Question> questions = IntStream.range(11, 22).mapToObj(questionService::getQuestionByOrder).toList();
+            IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(i+1, questions.get(i)), instant.plusSeconds(3 + (i * 20L))));
+        } else {
+            return;
+        }
     }
 
     /**
@@ -75,33 +82,29 @@ public class TaskRunner {
      * the question, the question's options, the id and time. Then removes the first element of the list.
      * If it is the last question, it also stops the scheduler</p>
      */
-    private void executeTask(int round) {
-        logger.info("Task Executed");
-        try {
-            questionNumber.incrementAndGet();
-            userService.resetDebuffAtm();
-            if (questionNumber.get() == 11 && round == 1) {
+    private void executeTask(int questionNumber, Question question) {
+        userService.resetDebuffAtm();
+
+        if (questionNumber == 11) {
                 updateRoundsAndTime();
-                questionService.updateCurrentQuestion(questionNumber.get());
-                questionNumber.decrementAndGet();
-            } else if (questionNumber.get() == 21 && round == 2) {
-                questionNumber.getAndSet(0);
-                updateRoundsAndTime();
+                questionService.updateCurrentQuestion(questionNumber);
             }
             else {
-                Question currentQuestion = questionService.getQuestionByOrder(questionNumber.get());
+                if (question != null) {
+                    try {
+                        ZonedDateTime eetTime = ZonedDateTime.now(eetTimeZone);
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        String formattedDateTime = eetTime.format(formatter);
+                        question.setTimeSent(formattedDateTime);
 
-                if (currentQuestion != null) {
-                    QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), questionNumber.get());
-                    kafkaProducer.sendQuestion("questions", dto);
-                    questionService.updateCurrentQuestion(questionNumber.get());
+                        QuestionDTO dto = new QuestionDTO(question.getQuestion(), question.getOptions(), question.getQuestionId(), question.getTimeSent(), EncryptionUtils.encrypt(question.getCorrectAnswer()), questionNumber);
+                        kafkaProducer.sendQuestion("questions", dto);
+                        questionService.updateCurrentQuestion(questionNumber);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
-        } catch (JsonProcessingException e) {
-            logger.error("Task interrupted " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
