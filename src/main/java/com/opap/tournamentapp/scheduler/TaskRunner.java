@@ -10,6 +10,7 @@ import com.opap.tournamentapp.service.RegistrationsTimeService;
 import com.opap.tournamentapp.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -31,11 +32,13 @@ public class TaskRunner {
     private static final Logger logger = LogManager.getLogger(TaskRunner.class);
 
     private final QuestionService questionService;
-    private final KafkaProducer kafkaProducer;
+    //private final KafkaProducer kafkaProducer;
     private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
     private final TaskScheduler taskScheduler;
     private final RegistrationsTimeService registrationsTimeService;
     final UserService userService;
+
+    SimpMessagingTemplate simpMessagingTemplate;
 
     /**
      * Initializes a new instance of {@code TaskRunner}.
@@ -46,14 +49,14 @@ public class TaskRunner {
      * and made ready to use within this constructor.
      * </p>
      */
-    public TaskRunner(QuestionService questionService, KafkaProducer kafkaProducer, UserService userService, RegistrationsTimeService registrationsTimeService) {
+    public TaskRunner(SimpMessagingTemplate simpMessagingTemplate,QuestionService questionService,  UserService userService, RegistrationsTimeService registrationsTimeService) {
         this.questionService = questionService;
         this.userService=userService;
-        this.kafkaProducer = kafkaProducer;
         this.registrationsTimeService = registrationsTimeService;
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         this.taskScheduler = scheduler;
+        this.simpMessagingTemplate=simpMessagingTemplate;
     }
 
     /**
@@ -98,7 +101,7 @@ public class TaskRunner {
                         question.setTimeSent(formattedDateTime);
 
                         QuestionDTO dto = new QuestionDTO(question.getQuestion(), question.getOptions(), question.getQuestionId(), question.getTimeSent(), EncryptionUtils.encrypt(question.getCorrectAnswer()), questionNumber);
-                        kafkaProducer.sendQuestion("questions", dto);
+                        simpMessagingTemplate.convertAndSend("/questions" , dto);
                         questionService.updateCurrentQuestion(questionNumber);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
