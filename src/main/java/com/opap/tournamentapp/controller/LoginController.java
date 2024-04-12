@@ -102,21 +102,4 @@ public class LoginController {
                     .body(response2);
         }
     }
-
-    /**
-     * <h2> Logout </h2>
-     *
-     *  Basic logout functionality, by clearing Session from the Http Request.
-     *  User redirected to ReactJS login page.
-     *
-     * @param request The HttpServletRequest of current user's session
-     * @return A new ResponseEntity with a 200 (OK) status code and response body with the String "Logged out successfully"
-     */
-    @PostMapping("/oauth/logout")
-    public ResponseEntity<String> logout (HttpServletRequest request, OAuth2AuthenticationToken token) throws JsonProcessingException {
-        request.getSession(false).invalidate();
-        User user = authService.getUserFromAuthenticationToken(token);
-        userService.logoutUser(user.getUsername());
-        return ResponseEntity.ok("Logged out successfully");
-    }
 }

@@ -42,6 +42,14 @@ public class QuestionService {
        }
     }
 
+    public void setTimeSent(Question question) {
+        ZonedDateTime eetTime = ZonedDateTime.now(eetTimeZone);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = eetTime.format(formatter);
+        question.setTimeSent(formattedDateTime);
+        questionRepository.save(question);
+    }
+
     public Question getQuestionByOrder(int order) {
         return questionRepository.findQuestionByQuestionOrder(order);
     }

@@ -32,8 +32,6 @@ public class TaskRunner {
     private static final Logger logger = LogManager.getLogger(TaskRunner.class);
 
     private final QuestionService questionService;
-    //private final KafkaProducer kafkaProducer;
-    private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
     private final TaskScheduler taskScheduler;
     private final RegistrationsTimeService registrationsTimeService;
     final UserService userService;
@@ -90,19 +88,15 @@ public class TaskRunner {
 
         if (questionNumber == 11) {
                 updateRoundsAndTime();
-                questionService.updateCurrentQuestion(questionNumber);
+//                questionService.updateCurrentQuestion(questionNumber);
             }
             else {
                 if (question != null) {
                     try {
-                        ZonedDateTime eetTime = ZonedDateTime.now(eetTimeZone);
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                        String formattedDateTime = eetTime.format(formatter);
-                        question.setTimeSent(formattedDateTime);
-
+                        questionService.setTimeSent(question);
                         QuestionDTO dto = new QuestionDTO(question.getQuestion(), question.getOptions(), question.getQuestionId(), question.getTimeSent(), EncryptionUtils.encrypt(question.getCorrectAnswer()), questionNumber);
                         simpMessagingTemplate.convertAndSend("/questions" , dto);
-                        questionService.updateCurrentQuestion(questionNumber);
+//                        questionService.updateCurrentQuestion(questionNumber);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
