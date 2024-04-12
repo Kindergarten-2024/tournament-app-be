@@ -6,6 +6,10 @@ import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.AuthService;
 import com.opap.tournamentapp.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
@@ -17,13 +21,15 @@ import java.util.Map;
 
 @Controller
 public class LoginController {
-
+    private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
     private final AuthService authService;
     private final UserService userService;
+    private final String frontendUrl;
 
-    public LoginController(AuthService authService, UserService userService){
+    public LoginController(AuthService authService, UserService userService,@Value("${frontendUrl:http://localhost:3000}") String frontendUrl ){
         this.authService=authService;
         this.userService = userService;
+        this.frontendUrl = frontendUrl;
     }
 
     /**
@@ -45,9 +51,14 @@ public class LoginController {
      * If user not authenticated, the endpoint automatically redirects to Google OAuth2 login page
      * @return Redirection to Google OAuth2 page
      */
-    @RequestMapping("/oauth/login/google")
-    public String loginRedirectGoogle() {
-        return "redirect:/oauth2/authorization/google";
+    @RequestMapping("/oauth/login/linkedin")
+    public String loginRedirectLinkedin() {
+        return "redirect:/oauth2/authorization/linkedin";
+    }
+
+    @RequestMapping("/redirect")
+    public String redirectToLogin() {
+        return "redirect:" + frontendUrl;
     }
 
     /**
@@ -60,7 +71,7 @@ public class LoginController {
      */
     @GetMapping("/oauth/login/success")
     public String loginSuccessRedirect() {
-        return "redirect:http://localhost:3000/auth/callback";
+        return "redirect:" + frontendUrl;
     }
 
     /**
@@ -74,16 +85,21 @@ public class LoginController {
      */
     @GetMapping("/loggedin")
     public ResponseEntity<CheckLoginResponseDTO> loggedIn(OAuth2AuthenticationToken token) {
-        if (token != null) {
+        CacheControl cacheControl = CacheControl.noStore().mustRevalidate();
 
+        if (token != null) {
             Map<String, Object> user = authService.userMap(token);
-            System.out.println(user);
+            LOGGER.info(user);
 
             CheckLoginResponseDTO response = new CheckLoginResponseDTO(true, user);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .cacheControl(cacheControl)
+                    .body(response);
         } else {
             CheckLoginResponseDTO response2 = new CheckLoginResponseDTO(false, null);
-            return ResponseEntity.ok(response2);
+            return ResponseEntity.ok()
+                    .cacheControl(cacheControl)
+                    .body(response2);
         }
     }
 

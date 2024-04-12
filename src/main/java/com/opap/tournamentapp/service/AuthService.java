@@ -17,13 +17,23 @@ public class AuthService {
     }
 
     public User getUserFromAuthenticationToken(OAuth2AuthenticationToken token) {
+
         if (token == null) {
             return null;
         }
         OAuth2User oAuth2User = token.getPrincipal();
         Map<String, Object> attributes = oAuth2User.getAttributes();
+
+        String email = (String) attributes.get("email");
+
         String username = (String) attributes.get("login");
-        return userService.findByUsername(username);
+
+        if (username == null){
+            return userService.findByUsername(email);
+        }
+        else {
+            return userService.findByUsername(username);
+        }
     }
 
     public Map<String, Object> userMap(OAuth2AuthenticationToken token) {

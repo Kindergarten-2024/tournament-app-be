@@ -43,13 +43,26 @@ public class WebSocketTextController {
      */
     @MessageMapping("/sendMessageAndAnswer")
     public void receiveMessage(@Payload TextMessageAndAnswerDTO textMessageDTO, OAuth2AuthenticationToken token) throws JsonProcessingException {
-        Long id = userService.findUserIdByUsername(token.getPrincipal().getAttribute("login"));
-        userAnswerService.submitAnswer(id, textMessageDTO.getQuestionId(), textMessageDTO.getAnswer());
+        if (token.getPrincipal().getAttribute("login") != null){
+            Long id = userService.findUserIdByUsername(token.getPrincipal().getAttribute("login"));
+            userAnswerService.submitAnswer(id, textMessageDTO.getQuestionId(), textMessageDTO.getAnswer());
+        }
+        else{
+            Long id = userService.findUserIdByUsername(token.getPrincipal().getAttribute("email"));
+            userAnswerService.submitAnswer(id, textMessageDTO.getQuestionId(), textMessageDTO.getAnswer());
+        }
     }
 
-    //notification that question ended
-    @MessageMapping("/questionEnded")
-    public void receiveMessage(@Payload TextMessageDTO textMessageDTO) throws JsonProcessingException {
-        questionService.submitQuestionEnd(textMessageDTO.getMessage());
+    @MessageMapping("/usePower")
+    public void receiveMessage(@Payload TextMessageDTO textMessageDTO,OAuth2AuthenticationToken token) throws JsonProcessingException {
+        if (token.getPrincipal().getAttribute("login") != null) {
+            Long id = userService.findUserIdByUsername(token.getPrincipal().getAttribute("login"));
+            userAnswerService.usePower(id, textMessageDTO.getMessage(), textMessageDTO.getEnemy());
+        }
+        else {
+            Long id = userService.findUserIdByUsername(token.getPrincipal().getAttribute("email"));
+            userAnswerService.usePower(id, textMessageDTO.getMessage(), textMessageDTO.getEnemy());
+        }
     }
+
 }

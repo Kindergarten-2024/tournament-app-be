@@ -18,8 +18,7 @@ public class FirebaseConfig {
         GoogleCredentials googleCredentials = GoogleCredentials
                 .fromStream(new ClassPathResource("firebase-service-account.json").getInputStream());
 
-        FirebaseOptions firebaseOptions = FirebaseOptions
-                .builder()
+        FirebaseOptions firebaseOptions = FirebaseOptions.builder()
                 .setCredentials(googleCredentials)
                 .build();
 

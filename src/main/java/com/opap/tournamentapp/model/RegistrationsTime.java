@@ -2,7 +2,7 @@ package com.opap.tournamentapp.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "registrations_time")
@@ -13,13 +13,13 @@ public class RegistrationsTime {
     private Long registrationsTimeId;
 
     private int tournamentRound;
-    private LocalDateTime registrationsEndTime;
+    private ZonedDateTime registrationsEndTime;
     private boolean registrationsOpen;
 
     public RegistrationsTime() {
     }
 
-    public RegistrationsTime(LocalDateTime registrationsEndTime, boolean registrationsOpen, int tournamentRound) {
+    public RegistrationsTime(ZonedDateTime registrationsEndTime, boolean registrationsOpen, int tournamentRound) {
         this.registrationsEndTime = registrationsEndTime;
         this.tournamentRound = tournamentRound;
         this.registrationsOpen = registrationsOpen;
@@ -37,11 +37,11 @@ public class RegistrationsTime {
 
 
 
-    public LocalDateTime getRegistrationsEndTime() {
+    public ZonedDateTime getRegistrationsEndTime() {
         return registrationsEndTime;
     }
 
-    public void setRegistrationsEndTime(LocalDateTime registrationsEndTime) {
+    public void setRegistrationsEndTime(ZonedDateTime registrationsEndTime) {
         this.registrationsEndTime = registrationsEndTime;
     }
 

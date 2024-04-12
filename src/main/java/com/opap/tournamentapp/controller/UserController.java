@@ -13,21 +13,8 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService=userService;
-
-    }
-
-    /**
-     * <h2> Leaderboard </h2>
-     *
-     * Return a list of all users in descending score order.
-     *
-     * @return A list of Users.
-     */
-    @GetMapping("/leaderboard")
-    public List<User> getLeaderboard() {
-        return userService.findAllByDescScore();
     }
 
     // Create a new user

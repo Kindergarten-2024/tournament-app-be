@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
@@ -139,15 +141,26 @@ public class RegistrationsController {
      * @param payload The new end time we want to set.
      * @return A new ResponseEntity with a 200 (OK) status code and response body with the new end time.
      */
+
     @PostMapping("/admin/end-date")
     public ResponseEntity<String> setEndDate(@RequestBody Map<String, String> payload) {
         String newEndDate = payload.get("newEndDate");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        ZoneId zoneId = ZoneId.of("Europe/Athens");
 
         try {
+            // First, parse the string to a LocalDateTime
             LocalDateTime parsedEndDate = LocalDateTime.parse(newEndDate, formatter);
-            registrationsTimeService.setRegistrationsEndTime(parsedEndDate);
-            return ResponseEntity.ok(newEndDate);
+
+            // Then, convert it to a ZonedDateTime using the specified zone
+            ZonedDateTime zonedDateTime = ZonedDateTime.of(parsedEndDate, zoneId);
+
+            // Now, pass the ZonedDateTime to your service method
+            registrationsTimeService.setRegistrationsEndTime(zonedDateTime);
+
+            // You may want to return the formatted ZonedDateTime string including the time zone
+            String responseDate = zonedDateTime.format(formatter); // Note: This does not include time zone information in the string
+            return ResponseEntity.ok(responseDate);
         } catch (DateTimeParseException error) {
             return ResponseEntity.badRequest().body("Invalid date format, with error: " + error);
         }

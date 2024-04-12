@@ -1,40 +1,54 @@
 package com.opap.tournamentapp.service;
 
-import com.opap.tournamentapp.dto.SharedData;
 import com.opap.tournamentapp.model.Question;
-import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.repository.QuestionRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class QuestionService {
-
+    private static final Logger logger = LogManager.getLogger(QuestionService.class);
     private final QuestionRepository questionRepository;
 
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     private final UserService userService;
+
+    private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
     public QuestionService(QuestionRepository questionRepository, SimpMessagingTemplate simpMessagingTemplate, UserService userService){
         this.questionRepository=questionRepository;
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.userService = userService;
     }
 
-    /**
-     *  Given a count integer (the number of questions to return)
-     *  return a shuffled list of questions.
-     */
-    @Deprecated
-    public List<Question> getRandomQuestions(int count) {
-        List<Question> allQuestions = questionRepository.findAll();
-        Collections.shuffle(allQuestions);
-        return allQuestions.subList(0, count);
+    public void updateCurrentQuestion(int questionNumber) {
+       Question currentQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
+       currentQuestion.setCurrentQuestion(true);
+       questionRepository.save(currentQuestion);
+
+       questionNumber = questionNumber - 1;
+       if (questionNumber > 0) {
+           Question previousQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
+           previousQuestion.setCurrentQuestion(false);
+           questionRepository.save(previousQuestion);
+       }
+    }
+
+    public Question getQuestionByOrder(int order) {
+        return questionRepository.findQuestionByQuestionOrder(order);
+    }
+
+    public Question getCurrentQuestion() {
+        Optional<Question> optionalQuestion = questionRepository.findByCurrentQuestionTrue();
+        return optionalQuestion.orElse(null);
     }
 
     // Create a new question
@@ -58,9 +72,10 @@ public class QuestionService {
         if (question.isPresent()) {
             Question existingQuestion = question.get();
             existingQuestion.setQuestion(questionDetails.getQuestion());
-            existingQuestion.setDifficulty(questionDetails.getDifficulty());
+            existingQuestion.setCurrentQuestion(questionDetails.getCurrentQuestion());
             existingQuestion.setOptions(questionDetails.getOptions());
             existingQuestion.setCorrectAnswer(questionDetails.getCorrectAnswer());
+            existingQuestion.setQuestionOrder(questionDetails.getQuestionOrder());
             return questionRepository.save(existingQuestion);
         }
         return null;
@@ -70,17 +85,6 @@ public class QuestionService {
      *  Given the message "questionEnded" from frontend
      *  Makes a list of users with DescScore and send it
      */
-    public void submitQuestionEnd(String message){
-        SharedData sharedData = SharedData.getInstance();
-        if(Objects.equals(message, "questionEnded") && sharedData.isTrue()) {
-            sharedData.makeFalse();
-            List<User> descPlayerList = userService.findAllByDescScore();
-            if (descPlayerList != null && !descPlayerList.isEmpty()) {
-                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
-                System.out.println("Sending to /leaderboard after");
-            }
-        }
-    }
 
     // Delete all questions
     public void deleteAllQuestions() {

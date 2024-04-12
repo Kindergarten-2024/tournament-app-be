@@ -18,7 +18,9 @@ public class Question {
     private List<String> options;
 
     private String correctAnswer;
-    private Integer difficulty;
+    private Integer questionOrder;
+    private Boolean currentQuestion;
+    private String timeSent;
 
     public Question() {
     }
@@ -27,11 +29,29 @@ public class Question {
         this.questionId = questionId;
     }
 
-    public Question(String question, List<String> options, String correctAnswer, Integer difficulty) {
+    public Question(String question, List<String> options, String correctAnswer, Integer questionOrder, Boolean currentQuestion, String timeSent) {
         this.question = question;
         this.options = options;
         this.correctAnswer = correctAnswer;
-        this.difficulty = difficulty;
+        this.questionOrder = questionOrder;
+        this.currentQuestion = currentQuestion;
+        this.timeSent = timeSent;
+    }
+
+    public Integer getQuestionOrder() {
+        return questionOrder;
+    }
+
+    public void setQuestionOrder(Integer questionOrder) {
+        this.questionOrder = questionOrder;
+    }
+
+    public Boolean getCurrentQuestion() {
+        return currentQuestion;
+    }
+
+    public void setCurrentQuestion(Boolean currentQuestion) {
+        this.currentQuestion = currentQuestion;
     }
 
     public Long getQuestionId() {
@@ -66,11 +86,11 @@ public class Question {
         this.correctAnswer = correctAnswer;
     }
 
-    public Integer getDifficulty() {
-        return difficulty;
+    public String getTimeSent() {
+        return timeSent;
     }
 
-    public void setDifficulty(Integer difficulty) {
-        this.difficulty = difficulty;
+    public void setTimeSent(String timeSent) {
+        this.timeSent = timeSent;
     }
 }
