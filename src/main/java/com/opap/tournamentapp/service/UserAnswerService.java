@@ -20,28 +20,19 @@ import java.util.Objects;
 @Service
 public class UserAnswerService {
 
-    private final UserAnswerRepository userAnswerRepository;
-
-    private final QuestionRepository questionRepository;
-
-    final UserService userService;
-
-    private final UserRepository userRepository;
-
     private static final Logger logger= LogManager.getLogger(KafkaConsumer.class);
 
-    private final KafkaProducer producer;
-
-    TextMessageDTO textMessageDTO = new TextMessageDTO();
+    private final UserAnswerRepository userAnswerRepository;
+    private final QuestionRepository questionRepository;
+    final UserService userService;
+    private final UserRepository userRepository;
     SimpMessagingTemplate simpMessagingTemplate;
 
-
-    public UserAnswerService(SimpMessagingTemplate simpMessagingTemplate,UserAnswerRepository userAnswerRepository, QuestionRepository questionRepository, UserService userService, UserRepository userRepository,KafkaProducer producer) {
+    public UserAnswerService(SimpMessagingTemplate simpMessagingTemplate,UserAnswerRepository userAnswerRepository, QuestionRepository questionRepository, UserService userService, UserRepository userRepository) {
         this.userAnswerRepository = userAnswerRepository;
         this.questionRepository = questionRepository;
         this.userService = userService;
         this.userRepository = userRepository;
-        this.producer=producer;
         this.simpMessagingTemplate=simpMessagingTemplate;
     }
 
@@ -70,19 +61,13 @@ public class UserAnswerService {
             userAnswer.setAnswer(answer);
             userAnswer.setCorrect(isCorrect);
 
-            //produce to lock the answer
-            if (!Objects.equals(userAnswer.getAnswer(), "-")) {
-                textMessageDTO.setMessage(user.getUsername());
-                producer.sendMessage("lock", textMessageDTO);
-            }
             // Save to answer database and update user's score
             userAnswerRepository.save(userAnswer);
             updateUserScore(userId, isCorrect);
-            List<User> descPlayerList = userService.findAllByDescScore();
-            if (descPlayerList != null && !descPlayerList.isEmpty()) {
-                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
-                logger.info("Sending to /leaderboard");
-            }
+//            List<User> descPlayerList = userService.findAllByDescScore();
+//            if (descPlayerList != null && !descPlayerList.isEmpty()) {
+//                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+//            }
         }
     }
 
@@ -99,23 +84,23 @@ public class UserAnswerService {
         if (user != null && isCorrect) {
             user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
             // boost is basically double points for correct answer >=3 and triple on >=5 also win an power
-            if (user.getCorrectAnswerStreak() > 0 ){
+            if (user.getCorrectAnswerStreak() > 0) {
                 obtainPower(user); //obtain power depending on streak
                 if (user.getCorrectAnswerStreak() >= 5) { //5+
                     user.setScore((user.getScore() + 3));
                 }
-                else if(user.getCorrectAnswerStreak() >=3){ //3-4
-                user.setScore(user.getScore() +2 );
+                else if(user.getCorrectAnswerStreak() >=3 ) { //3-4
+                user.setScore(user.getScore() + 2);
                 }
-                else{
-                    user.setScore(user.getScore()+1);
+                else {
+                    user.setScore(user.getScore() + 1);
                 }
             }
-            else{
-                user.setScore(user.getScore()+1); //0-1-2
+            else {
+                user.setScore(user.getScore() + 1); //0-1-2
             }
         }
-        else{
+        else {
             assert user != null;
             user.setCorrectAnswerStreak(0);
             user.setItem("null");
@@ -123,25 +108,24 @@ public class UserAnswerService {
         userRepository.save(user);
     }
 
-
-    public void obtainPower(User user){
-        if(user.getCorrectAnswerStreak() ==1 ){
+    public void obtainPower(User user) {
+        if(user.getCorrectAnswerStreak() == 1) {
                 user.setItem("50-50");
         }
-        else if(user.getCorrectAnswerStreak() == 3 ){
+        else if(user.getCorrectAnswerStreak() == 3) {
                 user.setItem("freeze");
         }
-        else if (user.getCorrectAnswerStreak() == 5){
+        else if (user.getCorrectAnswerStreak() == 5) {
                 user.setItem("mask");
-
         }
     }
 
-    public void usePower(Long userId,String item,Long enemyId) {
+    public void usePower(Long userId, String item, Long enemyId) {
         User user = userRepository.findUserByUserId(userId);
         User enemy=userRepository.findUserByUserId(enemyId);
         logger.info(item);
         logger.info(user);
+
         if (user != null) {
             //secure it has the item to user power of
             if (Objects.equals(user.getItem(), item)){
@@ -151,7 +135,7 @@ public class UserAnswerService {
                     enemy.setMask_debuff(true);
                     enemy.setDebuffAtm("mask");
                     double stolenPoints=enemy.getScore()/4.0;
-                    stolenPoints = Math.ceil(stolenPoints);;
+                    stolenPoints = Math.ceil(stolenPoints);
                     int stolenPointsInt = (int) stolenPoints;
                     enemy.setScore(enemy.getScore() - stolenPointsInt); //losing the 1/4 of the points,todo modify it
                     user.setScore(user.getScore() + stolenPointsInt);
@@ -180,6 +164,5 @@ public class UserAnswerService {
                 }
             }
         }
+
     }
-
-

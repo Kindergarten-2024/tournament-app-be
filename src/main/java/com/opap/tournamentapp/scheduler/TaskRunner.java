@@ -5,6 +5,7 @@ import com.opap.tournamentapp.dto.QuestionDTO;
 import com.opap.tournamentapp.encryption.EncryptionUtils;
 import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.Question;
+import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.QuestionService;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
 import com.opap.tournamentapp.service.UserService;
@@ -62,15 +63,43 @@ public class TaskRunner {
      *
      * <p>start's the scheduler when it needs to in</p>
      */
+//    public void startScheduler(int round) {
+//        LocalDateTime now = LocalDateTime.now();
+//        Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
+//        if(round == 1) {
+//            List<Question> questions = IntStream.range(1, 12).mapToObj(questionService::getQuestionByOrder).toList();
+//            IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(i+1, questions.get(i)), instant.plusSeconds(3 + (i * 20L))));
+//        } else if (round == 2) {
+//            List<Question> questions = IntStream.range(11, 22).mapToObj(questionService::getQuestionByOrder).toList();
+//            IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(i+1, questions.get(i)), instant.plusSeconds(3 + (i * 20L))));
+//        } else {
+//            return;
+//        }
+//    }
+
     public void startScheduler(int round) {
         LocalDateTime now = LocalDateTime.now();
         Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
-        if(round == 1) {
+        if (round == 1) {
             List<Question> questions = IntStream.range(1, 12).mapToObj(questionService::getQuestionByOrder).toList();
-            IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(i+1, questions.get(i)), instant.plusSeconds(3 + (i * 20L))));
+            for (int i = 0; i <= 10; i++) {
+                Instant taskAInstant = instant.plusSeconds(3 + (30 * i));
+                Instant taskBInstant = taskAInstant.plusSeconds(20);
+
+                int finalI = i;
+                taskScheduler.schedule(() -> sendQuestion(finalI + 1, questions.get(finalI)), taskAInstant);
+                taskScheduler.schedule(() -> sendLeaderboard(), taskBInstant);
+            }
         } else if (round == 2) {
             List<Question> questions = IntStream.range(11, 22).mapToObj(questionService::getQuestionByOrder).toList();
-            IntStream.range(0,11).forEach(i -> taskScheduler.schedule(() -> executeTask(i+1, questions.get(i)), instant.plusSeconds(3 + (i * 20L))));
+            for (int i = 0; i <= 10; i++) {
+                Instant taskAInstant = instant.plusSeconds(3 + (30 * i));
+                Instant taskBInstant = taskAInstant.plusSeconds(20);
+
+                int finalI = i;
+                taskScheduler.schedule(() -> sendQuestion(finalI + 1, questions.get(finalI)), taskAInstant);
+                taskScheduler.schedule(() -> sendLeaderboard(), taskBInstant);
+            }
         } else {
             return;
         }
@@ -83,9 +112,7 @@ public class TaskRunner {
      * the question, the question's options, the id and time. Then removes the first element of the list.
      * If it is the last question, it also stops the scheduler</p>
      */
-    private void executeTask(int questionNumber, Question question) {
-        userService.resetDebuffAtm();
-
+    private void sendQuestion(int questionNumber, Question question) {
         if (questionNumber == 11) {
                 updateRoundsAndTime();
 //                questionService.updateCurrentQuestion(questionNumber);
@@ -102,6 +129,15 @@ public class TaskRunner {
                     }
                 }
             }
+    }
+
+    public void sendLeaderboard() {
+        userService.resetDebuffAtm();
+
+        List<User> descPlayerList = userService.findAllByDescScore();
+        if (descPlayerList != null && !descPlayerList.isEmpty()) {
+            simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
+        }
     }
 
     /**

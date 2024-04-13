@@ -62,7 +62,7 @@ public class RegistrationsTimeService {
                 userService.resetMaskCooldown(); //reset mask in every first round
                 userService.resetFreezeCooldown(); //reset freeze in every first round
                 userService.resetDebuffAtm();
-                registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(5));
+                registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(7));
                 registrationsTimeRepository.save(registrationsTime);
     }
 
