@@ -159,8 +159,8 @@ public class UserAnswerService {
                 user.setItem(null); //used his item so reset it
                 userRepository.save(user);
                 List<User> descPlayerList = userService.findAllByDescScore();
-                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
-                logger.info("Sending to /leaderboard because an ability was used");
+                simpMessagingTemplate.convertAndSend("/powers", descPlayerList);
+                logger.info("Sending to /powers because an ability was used");
                 }
             }
         }
