@@ -2,9 +2,6 @@ package com.opap.tournamentapp.service;
 
 import com.opap.tournamentapp.model.Question;
 import com.opap.tournamentapp.repository.QuestionRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
@@ -15,18 +12,11 @@ import java.util.Optional;
 
 @Service
 public class QuestionService {
-    private static final Logger logger = LogManager.getLogger(QuestionService.class);
+
     private final QuestionRepository questionRepository;
-
-    private final SimpMessagingTemplate simpMessagingTemplate;
-
-    private final UserService userService;
-
     private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
-    public QuestionService(QuestionRepository questionRepository, SimpMessagingTemplate simpMessagingTemplate, UserService userService){
+    public QuestionService(QuestionRepository questionRepository) {
         this.questionRepository=questionRepository;
-        this.simpMessagingTemplate = simpMessagingTemplate;
-        this.userService = userService;
     }
 
     public void updateCurrentQuestion(int questionNumber) {
@@ -88,11 +78,6 @@ public class QuestionService {
         }
         return null;
     }
-
-    /**
-     *  Given the message "questionEnded" from frontend
-     *  Makes a list of users with DescScore and send it
-     */
 
     // Delete all questions
     public void deleteAllQuestions() {

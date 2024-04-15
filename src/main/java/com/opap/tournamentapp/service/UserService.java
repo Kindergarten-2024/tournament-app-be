@@ -45,11 +45,11 @@ public class UserService {
         }
         User user=findByUsername(username);
         TextMessageDTO textMessageDTO = new TextMessageDTO();
-        textMessageDTO.setMessage(user.getUsername()+" "+"registered");
-        producer.sendMessage("logs",textMessageDTO);
+        textMessageDTO.setMessage(user.getUsername() + " registered");
+//        producer.sendMessage("logs",textMessageDTO);
         //sending socket for total register
         simpMessagingTemplate.convertAndSend("/totalRegister", totalRegistered());
-        logger.info("Sending the total registerd on total register and is " + totalRegistered());
+        logger.info("Sending the total registered on total register and is " + totalRegistered());
         userRepository.save(user);
         //also sending leaderboard when someone register
         List<User> descPlayerList = findAllByDescScore();
@@ -64,8 +64,8 @@ public class UserService {
         if (user.isPresent()) {
             user.get().setRegistered(false);
             TextMessageDTO textMessageDTO = new TextMessageDTO();
-            textMessageDTO.setMessage(user.get().getUsername()+" "+"unregistered");
-            producer.sendMessage("logs",textMessageDTO);
+            textMessageDTO.setMessage(user.get().getUsername() + " unregistered");
+//            producer.sendMessage("logs",textMessageDTO);
             userRepository.save(user.get());
             simpMessagingTemplate.convertAndSend("/totalRegister", totalRegistered());
         }
