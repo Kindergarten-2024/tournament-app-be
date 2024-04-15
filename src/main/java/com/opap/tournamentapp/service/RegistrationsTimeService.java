@@ -15,9 +15,7 @@ import java.time.ZonedDateTime;
 @Service
 public class RegistrationsTimeService {
 
-
     final RegistrationsTimeRepository registrationsTimeRepository;
-
     final UserService userService;
 
     public RegistrationsTimeService(RegistrationsTimeRepository registrationsTimeRepository, UserService userService){
@@ -26,19 +24,14 @@ public class RegistrationsTimeService {
     }
 
     public void registrationsTimeInit() {
-
         ZoneId zoneId = ZoneId.of("Europe/Athens");
-
-
         LocalDateTime localDateTime = LocalDateTime.of(2024, Month.APRIL, 28, 17, 0, 0);
-
-        // Converting LocalDateTime to ZonedDateTime using the specified time zone
         ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, zoneId);
 
-                if(registrationsTimeRepository.findFirstRecord() == null) {
-                    RegistrationsTime registrationsTime = new RegistrationsTime(zonedDateTime,true,1);
-                    registrationsTimeRepository.save(registrationsTime);
-                }
+        if(registrationsTimeRepository.findFirstRecord() == null) {
+            RegistrationsTime registrationsTime = new RegistrationsTime(zonedDateTime,true,1);
+            registrationsTimeRepository.save(registrationsTime);
+        }
     }
 
     public ZonedDateTime getRegistrationsEndTime() {
@@ -55,22 +48,21 @@ public class RegistrationsTimeService {
         registrationsTimeRepository.save(registrationsTime);
     }
 
-
-    public void setRegistrationRoundsAndNextQuizStartTime(){
-                RegistrationsTime registrationsTime = registrationsTimeRepository.findFirstRecord();
-                registrationsTime.setTournamentRound(registrationsTime.getTournamentRound()+1);
-                userService.resetMaskCooldown(); //reset mask in every first round
-                userService.resetFreezeCooldown(); //reset freeze in every first round
-                userService.resetDebuffAtm();
-                registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(7));
-                registrationsTimeRepository.save(registrationsTime);
+    public void setRegistrationRoundsAndNextQuizStartTime() {
+        RegistrationsTime registrationsTime = registrationsTimeRepository.findFirstRecord();
+        registrationsTime.setTournamentRound(registrationsTime.getTournamentRound() + 1);
+        registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(7));
+        registrationsTimeRepository.save(registrationsTime);
+        userService.resetMaskCooldown(); // reset mask in every round
+        userService.resetFreezeCooldown(); // reset freeze in every round
+        userService.resetDebuffAtm();
     }
 
-
-    public int getRegistrationRounds(){
+    public int getRegistrationRounds() {
         RegistrationsTime registrationsTime = registrationsTimeRepository.findFirstRecord();
         return registrationsTime.getTournamentRound();
     }
+
     public void setIsRegistrationsOpen(boolean bool) {
         RegistrationsTime registrationsTime = registrationsTimeRepository.findFirstRecord();
         registrationsTime.setRegistrationsOpen(bool);
