@@ -7,8 +7,6 @@ import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.service.QuestionService;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
 import com.opap.tournamentapp.service.UserService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -67,7 +65,7 @@ public class TaskRunner {
                 taskScheduler.schedule(() -> sendQuestion(finalI + 1, questions.get(finalI)), taskAInstant);
                 taskScheduler.schedule(this::sendLeaderboard, taskBInstant);
             }
-            Instant lastTaskBInstant = instant.plusSeconds(3 + (30 * 10)).plusSeconds(20);
+            Instant lastTaskBInstant = instant.plusSeconds(3 + (30 * 9)).plusSeconds(30);
             taskScheduler.schedule(this::updateRoundsAndTime, lastTaskBInstant);
         } else if (round == 2) {
             List<Question> questions = IntStream.range(11, 21).mapToObj(questionService::getQuestionByOrder).toList();
@@ -79,7 +77,7 @@ public class TaskRunner {
                 taskScheduler.schedule(() -> sendQuestion(finalI + 1, questions.get(finalI)), taskAInstant);
                 taskScheduler.schedule(this::sendLeaderboard, taskBInstant);
             }
-            Instant lastTaskBInstant = instant.plusSeconds(3 + (30 * 10)).plusSeconds(20);
+            Instant lastTaskBInstant = instant.plusSeconds(3 + (30 * 9)).plusSeconds(30);
             taskScheduler.schedule(this::updateRoundsAndTime, lastTaskBInstant);
         } else {
             return;
