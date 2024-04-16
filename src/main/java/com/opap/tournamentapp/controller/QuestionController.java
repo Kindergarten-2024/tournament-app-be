@@ -1,10 +1,8 @@
 package com.opap.tournamentapp.controller;
 
-import com.opap.tournamentapp.dto.QuestionDTO;
-import com.opap.tournamentapp.encryption.EncryptionUtils;
+
 import com.opap.tournamentapp.model.Question;
 import com.opap.tournamentapp.service.QuestionService;
-import com.opap.tournamentapp.service.RegistrationsTimeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,13 +17,11 @@ import java.util.Optional;
 public class QuestionController {
 
     private final QuestionService questionService;
-    private final RegistrationsTimeService registrationsTimeService;
 
     private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
 
-    public QuestionController(QuestionService questionService, RegistrationsTimeService registrationsTimeService){
+    public QuestionController(QuestionService questionService) {
         this.questionService=questionService;
-        this.registrationsTimeService = registrationsTimeService;
     }
 
     @GetMapping("/time-now")
@@ -34,20 +30,6 @@ public class QuestionController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDateTime = eetTime.format(formatter);
         return ResponseEntity.ok(formattedDateTime);
-    }
-
-    @GetMapping("/get-current-question")
-    public ResponseEntity<?> getCurrentQuestion() throws Exception {
-        if (!registrationsTimeService.isRegistrationsOpen()) {
-            Question currentQuestion = questionService.getCurrentQuestion();
-            if (currentQuestion != null) {
-                QuestionDTO dto = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions(), currentQuestion.getQuestionId(), currentQuestion.getTimeSent(), EncryptionUtils.encrypt(currentQuestion.getCorrectAnswer()), currentQuestion.getQuestionOrder());
-                return ResponseEntity.ok(dto);
-            }
-            return ResponseEntity.ok("No question available.");
-        } else {
-            return ResponseEntity.ok("Round not started yet.");
-        }
     }
 
     // Create a new question

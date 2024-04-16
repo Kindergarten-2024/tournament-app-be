@@ -18,11 +18,9 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-
-    private final UserRepository userRepository;
-
     private static final Logger logger= LogManager.getLogger(UserService.class);
 
+    private final UserRepository userRepository;
     SimpMessagingTemplate simpMessagingTemplate;
 
 
@@ -33,21 +31,17 @@ public class UserService {
 
     public void loginUser(String fullName, String username, String avatarUrl) throws JsonProcessingException {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByUsername(username));
-        if (userOptional.isEmpty())
-            userRepository.save(new User(fullName, username, true, avatarUrl, 0,null,0,false,null));
-        else {
-            User user = userOptional.get();
-            user.setRegistered(true);
-            userRepository.save(user);
+        if (userOptional.isEmpty()){
+            userRepository.save(new User(fullName, username, avatarUrl, 0, null, 0, false, null));
         }
-        User user=findByUsername(username);
-        TextMessageDTO textMessageDTO = new TextMessageDTO();
-        textMessageDTO.setMessage(user.getUsername() + " registered");
+//        User user=findByUsername(username);
+//        TextMessageDTO textMessageDTO = new TextMessageDTO();
+//        textMessageDTO.setMessage(user.getUsername() + " registered");
 //        producer.sendMessage("logs",textMessageDTO);
         //sending socket for total register
         simpMessagingTemplate.convertAndSend("/totalRegister", totalRegistered());
         logger.info("Sending the total registered on total register and is " + totalRegistered());
-        userRepository.save(user);
+//        userRepository.save(user);
         //also sending leaderboard when someone register
         List<User> descPlayerList = findAllByDescScore();
         if (descPlayerList != null && !descPlayerList.isEmpty()) {
@@ -56,20 +50,8 @@ public class UserService {
         }
     }
 
-    public void logoutUser(String username) throws JsonProcessingException {
-        Optional<User> user = Optional.ofNullable(userRepository.findByUsername(username));
-        if (user.isPresent()) {
-            user.get().setRegistered(false);
-            TextMessageDTO textMessageDTO = new TextMessageDTO();
-            textMessageDTO.setMessage(user.get().getUsername() + " unregistered");
-//            producer.sendMessage("logs",textMessageDTO);
-            userRepository.save(user.get());
-            simpMessagingTemplate.convertAndSend("/totalRegister", totalRegistered());
-        }
-    }
-
     public int findPlayerPosition(User user) {
-        List<User> leaderboard = userRepository.findAllByRegisteredTrueOrderByScoreDesc();
+        List<User> leaderboard = userRepository.findAllByOrderByScoreDesc();
         return leaderboard.indexOf(user) + 1;
     }
 
@@ -104,7 +86,7 @@ public class UserService {
 
     // LeaderBoard
     public List<User> findAllByDescScore() {
-        return userRepository.findAllByRegisteredTrueOrderByScoreDesc();
+        return userRepository.findAllByOrderByScoreDesc();
     }
 
     public User findByUsername(String username){
@@ -115,7 +97,7 @@ public class UserService {
         if (userRepository == null) {
             throw new IllegalStateException("User repository is not initialized.");
         }
-        List<User> users = userRepository.findAllByRegisteredTrue();
+        List<User> users = userRepository.findAll();
         if (users == null) {
             return Collections.emptyList();
         }
@@ -177,9 +159,8 @@ public class UserService {
         }
     }
 
-
     public int totalRegistered(){
-        return userRepository.findAllByRegisteredTrue().size();
+        return userRepository.findAll().size();
     }
 
     // Delete all users

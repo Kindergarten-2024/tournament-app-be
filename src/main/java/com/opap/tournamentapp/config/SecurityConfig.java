@@ -1,4 +1,5 @@
 package com.opap.tournamentapp.config;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.service.UserService;
 import org.apache.logging.log4j.LogManager;
@@ -48,7 +49,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
                 .authorizeHttpRequests()
-                .requestMatchers("/oauth/login/linkedin","/oauth/login/github","/loggedin/**","/redirect", "/ws-message/public/**").permitAll()
+                .requestMatchers("/oauth/login/linkedin","/oauth/login/github","/loggedin/**","/redirect", "/ws-message/public/**", "/public/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
@@ -71,13 +72,9 @@ public class SecurityConfig {
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(WebClient rest) {
         DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
-        logger.info("IM IN SEC CONFIG OAUTH2SUSERSEREIVECCECEFERWERFDSDF");
         return request -> {
-
             OAuth2User user = delegate.loadUser(request);
-            logger.info("FIND ME FOR CRYING OUT LOUD!!!" + user);
             String registrationId = request.getClientRegistration().getRegistrationId();
-            logger.info("what is happening holmes: " + registrationId);
             OAuth2AuthorizedClient client = new OAuth2AuthorizedClient(request.getClientRegistration(), user.getName(), request.getAccessToken());
             String fullname, username, avatarUrl;
 
@@ -89,7 +86,6 @@ public class SecurityConfig {
                 fullname = user.getAttribute("name");
                 username = user.getAttribute("email");
                 avatarUrl = user.getAttribute("picture");
-                logger.info("1234123412 !!! IN SEC CONFIG22341@#$!" + user);
             }
             logger.info("Fullname: " + fullname + " Username: " + username);
             try {
@@ -108,11 +104,9 @@ public class SecurityConfig {
         OidcUserService delegate = new OidcUserService();
         return request -> {
             OidcUser user = delegate.loadUser(request);
-            logger.info("OIDC User: " + user);
             String registrationId = request.getClientRegistration().getRegistrationId();
-            logger.info("Registration ID: " + registrationId);
-
             String fullname, email, avatarUrl;
+
             if ("linkedin".equals(registrationId) && user instanceof OidcUser) {
                 OidcUser oidcUser = user;
                 fullname = oidcUser.getAttribute("name");
@@ -126,13 +120,9 @@ public class SecurityConfig {
                     throw new RuntimeException(e);
                 }
             }
-
-
             return (OidcUser) user;
         };
     }
-
-
 
     @Bean
     public WebClient rest(ClientRegistrationRepository clients, OAuth2AuthorizedClientRepository authz) {

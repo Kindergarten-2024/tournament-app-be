@@ -6,5 +6,4 @@ import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     Question findQuestionByQuestionOrder(Integer order);
-    Optional<Question> findByCurrentQuestionTrue();
 }
