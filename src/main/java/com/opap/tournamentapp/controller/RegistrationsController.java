@@ -25,81 +25,11 @@ public class RegistrationsController {
 
     private final UserService userService;
 
-    private final AuthService authService;
-
     private final RegistrationsTimeService registrationsTimeService;
 
-    public RegistrationsController(UserService userService, AuthService authService, RegistrationsTimeService registrationsTimeService){
+    public RegistrationsController(UserService userService, RegistrationsTimeService registrationsTimeService){
         this.userService=userService;
-        this.authService=authService;
         this.registrationsTimeService=registrationsTimeService;
-
-    }
-
-    /**
-     * <h2> Registration </h2>
-     * <p>
-     * Register current user by OAuth2 token to the tournament,
-     * by changing his Registered column to true.
-     *
-     * @param token The OAuth2AuthenticationToken of current user
-     * @return A new ResponseEntity with a 200 (OK) status code and response body with the String
-     * "Error" if token not exist, "Registered" if user registered and "Registrations closed." if registrations have closed
-     */
-    @PostMapping("/register")
-    public ResponseEntity<String> register(OAuth2AuthenticationToken token) {
-        User user = authService.getUserFromAuthenticationToken(token);
-
-        if (user == null) {
-            return ResponseEntity.ok("Error");
-        } else if (registrationsTimeService.isRegistrationsOpen()) {
-            Long user_id = user.getId();
-            user.setRegistered(true);
-            userService.updateUser(user_id, user);
-            return ResponseEntity.ok("Registered");
-        } else {
-            return ResponseEntity.ok("Registrations closed.");
-        }
-    }
-
-    /**
-     * <h2> Check if user is Registered </h2>
-     * <p>
-     * Checks if current user by OAuth2 token is registered.
-     *
-     * @param token The OAuth2AuthenticationToken of current user
-     * @return A new ResponseEntity with a 200 (OK) status code and response body with the String
-     * "Registered" if user is registered or { "message": "Not registered." } if not
-     */
-    @GetMapping("/check/register")
-    public ResponseEntity<?> checkRegister(OAuth2AuthenticationToken token) {
-
-        User user = authService.getUserFromAuthenticationToken(token);
-
-        if (user.getRegistered()) {
-            return ResponseEntity.ok("Registered");
-
-        } else {
-            return ResponseEntity.ok(Collections.singletonMap("message", "Not registered."));
-        }
-    }
-
-    /**
-     * <h2> Unregister </h2>
-     * <p>
-     * Unregister current user by OAuth2 token from the tournament,
-     * by changing his Registered column to false.
-     *
-     * @param token The OAuth2AuthenticationToken of current user
-     * @return A new ResponseEntity with a 200 (OK) status code and response body with the String "Successful unregister"
-     */
-    @PostMapping("/unregister")
-    public ResponseEntity<String> unRegister(OAuth2AuthenticationToken token) {
-        User user = authService.getUserFromAuthenticationToken(token);
-        Long user_id = user.getId();
-        user.setRegistered(false);
-        userService.updateUser(user_id, user);
-        return ResponseEntity.ok("Successful unregister");
     }
 
     /**
@@ -122,7 +52,7 @@ public class RegistrationsController {
      *
      * @return A new ResponseEntity with a 200 (OK) status code and response body with the LocalDateTime when registrations are closing
      */
-    @GetMapping("/admin/check/endtime")
+    @GetMapping("/public/check/endtime")
     public ResponseEntity<CheckRegistrationsTimeDTO> checkRegisterTime() {
         if(registrationsTimeService.isRegistrationsOpen()) {
             CheckRegistrationsTimeDTO checkRegistrationsTimeDTO = new CheckRegistrationsTimeDTO(true, registrationsTimeService.getRegistrationsEndTime(), registrationsTimeService.getRegistrationRounds());

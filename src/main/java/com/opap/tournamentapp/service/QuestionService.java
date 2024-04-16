@@ -19,19 +19,6 @@ public class QuestionService {
         this.questionRepository=questionRepository;
     }
 
-    public void updateCurrentQuestion(int questionNumber) {
-       Question currentQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
-       currentQuestion.setCurrentQuestion(true);
-       questionRepository.save(currentQuestion);
-
-       questionNumber = questionNumber - 1;
-       if (questionNumber > 0) {
-           Question previousQuestion = questionRepository.findQuestionByQuestionOrder(questionNumber);
-           previousQuestion.setCurrentQuestion(false);
-           questionRepository.save(previousQuestion);
-       }
-    }
-
     public void setTimeSent(Question question) {
         ZonedDateTime eetTime = ZonedDateTime.now(eetTimeZone);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -42,11 +29,6 @@ public class QuestionService {
 
     public Question getQuestionByOrder(int order) {
         return questionRepository.findQuestionByQuestionOrder(order);
-    }
-
-    public Question getCurrentQuestion() {
-        Optional<Question> optionalQuestion = questionRepository.findByCurrentQuestionTrue();
-        return optionalQuestion.orElse(null);
     }
 
     // Create a new question
@@ -70,7 +52,6 @@ public class QuestionService {
         if (question.isPresent()) {
             Question existingQuestion = question.get();
             existingQuestion.setQuestion(questionDetails.getQuestion());
-            existingQuestion.setCurrentQuestion(questionDetails.getCurrentQuestion());
             existingQuestion.setOptions(questionDetails.getOptions());
             existingQuestion.setCorrectAnswer(questionDetails.getCorrectAnswer());
             existingQuestion.setQuestionOrder(questionDetails.getQuestionOrder());

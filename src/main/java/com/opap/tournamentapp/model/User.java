@@ -12,21 +12,14 @@ public class User {
 
     private String fullName;
     private String username;
-    private Boolean registered;
     private int score;
-
     private int freeze_debuff;
     private boolean mask_debuff;
-
     private String avatarUrl;
-
     private int correctAnswerStreak;
-
     private String item;
     private String fcmToken;
-
     private String debuffAtm;
-
 
     public User () { }
 
@@ -34,10 +27,9 @@ public class User {
         this.userId = userId;
     }
 
-    public User(String fullName, String username, Boolean registered, String avatarUrl, int correctAnswerStreak,String item,int freeze_debuff,boolean mask_debuff,String debuffAtm) {
+    public User(String fullName, String username, String avatarUrl, int correctAnswerStreak,String item, int freeze_debuff, boolean mask_debuff, String debuffAtm) {
         this.fullName = fullName;
         this.username = username;
-        this.registered = registered;
         this.avatarUrl = avatarUrl;
         this.correctAnswerStreak = correctAnswerStreak;
         this.item=item;
@@ -60,15 +52,6 @@ public class User {
 
     public int getCorrectAnswerStreak() {
         return correctAnswerStreak;
-    }
-
-
-    public void setRegistered(Boolean registered) {
-        this.registered = registered;
-    }
-
-    public Boolean getRegistered() {
-        return registered;
     }
 
     public String getUsername() {
