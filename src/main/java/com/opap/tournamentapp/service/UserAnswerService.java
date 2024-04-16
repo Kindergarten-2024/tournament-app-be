@@ -44,6 +44,7 @@ public class UserAnswerService {
      * @param questionId The id of question answered.
      * @param answer The submitted answer of the user.
      */
+    @Transactional
     public void submitAnswer(Long userId, Long questionId, String answer) throws JsonProcessingException {
         Question question = questionRepository.findById(questionId).orElse(null);
         User user = userRepository.findUserByUserId(userId);
