@@ -1,7 +1,7 @@
 package com.opap.tournamentapp.scheduler;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
-import com.opap.tournamentapp.dto.RegistrationsTimeDTO;
+import com.opap.tournamentapp.dto.CheckRegistrationsTimeDTO;
 import com.opap.tournamentapp.model.RegistrationsTime;
 import com.opap.tournamentapp.service.FirebaseMessagingService;
 import com.opap.tournamentapp.service.RegistrationsTimeService;
@@ -23,7 +23,7 @@ public class RegistrationsTimeTask {
     private final FirebaseMessagingService firebaseMessagingService;
     private final TaskRunner taskRunner;
     private final ZoneId eetTimeZone=ZoneId.of("Europe/Athens");
-    RegistrationsTimeDTO registrationsTimeDTO = new RegistrationsTimeDTO();
+    CheckRegistrationsTimeDTO checkRegistrationsTimeDTO = new CheckRegistrationsTimeDTO();
 
     public RegistrationsTimeTask(RegistrationsTimeService registrationsTimeService, SimpMessagingTemplate simpMessagingTemplate, FirebaseMessagingService firebaseMessagingService, TaskRunner taskRunner) {
         this.registrationsTimeService = registrationsTimeService;
@@ -48,14 +48,16 @@ public class RegistrationsTimeTask {
             }
             registrationsTimeService.setIsRegistrationsOpen(true);
             firstTime = true;
-            registrationsTimeDTO.setTimerOn(true);
-            registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
-            simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
+            checkRegistrationsTimeDTO.setRegistrationsOpen(true);
+            checkRegistrationsTimeDTO.setRounds(registrationsTimeService.getRegistrationRounds());
+            checkRegistrationsTimeDTO.setRegistrationsEndTime(registrationsTimeService.getRegistrationsEndTime());
+            simpMessagingTemplate.convertAndSend("/registrations-time", checkRegistrationsTimeDTO);
         } else {
             registrationsTimeService.setIsRegistrationsOpen(false);
-            registrationsTimeDTO.setTimerOn(false);
-            registrationsTimeDTO.setRound(registrationsTimeService.getRegistrationRounds());
-            simpMessagingTemplate.convertAndSend("/registrations-time", registrationsTimeDTO);
+            checkRegistrationsTimeDTO.setRegistrationsOpen(false);
+            checkRegistrationsTimeDTO.setRounds(registrationsTimeService.getRegistrationRounds());
+            checkRegistrationsTimeDTO.setRegistrationsEndTime(registrationsTimeService.getRegistrationsEndTime());
+            simpMessagingTemplate.convertAndSend("/registrations-time", checkRegistrationsTimeDTO);
             if (firstTime && registrationsTimeService.getRegistrationRounds() <= 2) {
                 try {
                     taskRunner.startScheduler(registrationsTimeService.getRegistrationRounds());
