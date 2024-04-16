@@ -2,7 +2,6 @@ package com.opap.tournamentapp.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opap.tournamentapp.dto.TextMessageDTO;
-import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.repository.UserRepository;
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    private final KafkaProducer producer;
 
     private final UserRepository userRepository;
 
@@ -28,8 +26,7 @@ public class UserService {
     SimpMessagingTemplate simpMessagingTemplate;
 
 
-    public UserService(SimpMessagingTemplate simpMessagingTemplate,KafkaProducer producer, UserRepository userRepository) {
-        this.producer = producer;
+    public UserService(SimpMessagingTemplate simpMessagingTemplate, UserRepository userRepository) {
         this.userRepository = userRepository;
         this.simpMessagingTemplate=simpMessagingTemplate;
     }

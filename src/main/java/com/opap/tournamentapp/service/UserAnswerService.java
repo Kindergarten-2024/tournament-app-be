@@ -1,8 +1,5 @@
 package com.opap.tournamentapp.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.opap.tournamentapp.dto.TextMessageDTO;
-import com.opap.tournamentapp.kafka.KafkaConsumer;
-import com.opap.tournamentapp.kafka.KafkaProducer;
 import com.opap.tournamentapp.model.Question;
 import com.opap.tournamentapp.model.User;
 import com.opap.tournamentapp.model.UserAnswer;
@@ -20,7 +17,7 @@ import java.util.Objects;
 @Service
 public class UserAnswerService {
 
-    private static final Logger logger= LogManager.getLogger(KafkaConsumer.class);
+    private static final Logger logger= LogManager.getLogger(UserAnswerService.class);
 
     private final UserAnswerRepository userAnswerRepository;
     private final QuestionRepository questionRepository;
@@ -63,7 +60,7 @@ public class UserAnswerService {
 
             // Save to answer database and update user's score
             userAnswerRepository.save(userAnswer);
-            updateUserScore(userId, isCorrect);
+            updateUserScore(user, isCorrect);
 //            List<User> descPlayerList = userService.findAllByDescScore();
 //            if (descPlayerList != null && !descPlayerList.isEmpty()) {
 //                simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);
@@ -76,11 +73,10 @@ public class UserAnswerService {
      *
      * If user's answer is correct updates his score in the database.
      *
-     * @param userId The id of user who responds.
+     * @param user The user who responds.
      * @param isCorrect His answer is correct or wrong.
      */
-    private void updateUserScore(Long userId, boolean isCorrect) {
-        User user = userRepository.findUserByUserId(userId);
+    private void updateUserScore(User user, boolean isCorrect) {
         if (user == null) {
             logger.warn("user on function updateUserScore is null");
         } else {
