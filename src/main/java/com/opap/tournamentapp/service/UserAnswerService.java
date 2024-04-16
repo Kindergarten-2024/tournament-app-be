@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -76,7 +77,8 @@ public class UserAnswerService {
      * @param user The user who responds.
      * @param isCorrect His answer is correct or wrong.
      */
-    private void updateUserScore(User user, boolean isCorrect) {
+    @Transactional
+     void updateUserScore(User user, boolean isCorrect) {
         if (user == null) {
             logger.warn("user on function updateUserScore is null");
         } else {
@@ -114,7 +116,7 @@ public class UserAnswerService {
                 user.setItem("mask");
         }
     }
-
+@Transactional
     public void usePower(Long userId, String item, Long enemyId) {
         User user = userRepository.findUserByUserId(userId);
         User enemy=userRepository.findUserByUserId(enemyId);
