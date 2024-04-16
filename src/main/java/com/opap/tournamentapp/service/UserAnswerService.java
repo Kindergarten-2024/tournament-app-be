@@ -102,6 +102,7 @@ public class UserAnswerService {
                 user.setCorrectAnswerStreak(0);
                 user.setItem("null");
             }
+            user.setDebuffAtm(null);
             userRepository.save(user);
         }
     }

@@ -9,5 +9,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
     List<User> findAllByOrderByScoreDesc();
     User findUserByUserId(Long userId);
-    List<User> findAll();
 }

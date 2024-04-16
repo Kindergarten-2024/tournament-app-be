@@ -105,8 +105,6 @@ public class TaskRunner {
     }
 
     public void sendLeaderboard() {
-        userService.resetDebuffAtm();
-
         List<User> descPlayerList = userService.findAllByDescScore();
         if (descPlayerList != null && !descPlayerList.isEmpty()) {
             simpMessagingTemplate.convertAndSend("/leaderboard", descPlayerList);

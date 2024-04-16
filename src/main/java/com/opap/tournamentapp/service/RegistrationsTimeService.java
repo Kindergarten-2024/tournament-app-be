@@ -53,9 +53,7 @@ public class RegistrationsTimeService {
         registrationsTime.setTournamentRound(registrationsTime.getTournamentRound() + 1);
         registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(7));
         registrationsTimeRepository.save(registrationsTime);
-        userService.resetMaskCooldown(); // reset mask in every round
-        userService.resetFreezeCooldown(); // reset freeze in every round
-        userService.resetDebuffAtm();
+        userService.resetFreezeAndMaskCooldown();
     }
 
     public int getRegistrationRounds() {

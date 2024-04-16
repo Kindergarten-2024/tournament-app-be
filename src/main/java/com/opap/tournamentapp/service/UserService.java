@@ -93,17 +93,6 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public List<User> findAllRegisteredParticipants() {
-        if (userRepository == null) {
-            throw new IllegalStateException("User repository is not initialized.");
-        }
-        List<User> users = userRepository.findAll();
-        if (users == null) {
-            return Collections.emptyList();
-        }
-        return users;
-    }
-
     public Long findUserIdByUsername(String username) {
         User user = userRepository.findByUsername(username);
         return user != null ? user.getId() : null;
@@ -135,26 +124,11 @@ public class UserService {
         return null;
     }
 
-    public void resetMaskCooldown(){
-        List<User> users= getAllUsers();
-        for (User user:users){
-            user.setMask_debuff(false);
-            userRepository.save(user);
-        }
-    }
-
-    public void resetDebuffAtm(){
-        List<User> users=getAllUsers();
-        for (User user:users){
-            user.setDebuffAtm(null);
-            userRepository.save(user);
-        }
-    }
-
-    public void resetFreezeCooldown(){
-        List<User> users= getAllUsers();
-        for (User user:users){
+    public void resetFreezeAndMaskCooldown(){
+        List<User> users = getAllUsers();
+        for (User user:users) {
             user.setFreeze_debuff(0);
+            user.setMask_debuff(false);
             userRepository.save(user);
         }
     }
