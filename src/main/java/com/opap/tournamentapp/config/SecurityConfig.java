@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendUrl)))
                 .authorizeHttpRequests()
-                .requestMatchers("/oauth/login/linkedin","/oauth/login/github","/loggedin/**","/admin/**","/redirect", "/ws-message/public/**").permitAll()
+                .requestMatchers("/oauth/login/linkedin","/oauth/login/github","/loggedin/**","/redirect", "/ws-message/public/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()

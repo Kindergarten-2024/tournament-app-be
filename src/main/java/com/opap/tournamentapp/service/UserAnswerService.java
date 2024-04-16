@@ -81,31 +81,30 @@ public class UserAnswerService {
      */
     private void updateUserScore(Long userId, boolean isCorrect) {
         User user = userRepository.findUserByUserId(userId);
-        if (user != null && isCorrect) {
-            user.setCorrectAnswerStreak(user.getCorrectAnswerStreak() +1 );
-            // boost is basically double points for correct answer >=3 and triple on >=5 also win an power
-            if (user.getCorrectAnswerStreak() > 0) {
-                obtainPower(user); //obtain power depending on streak
-                if (user.getCorrectAnswerStreak() >= 5) { //5+
-                    user.setScore((user.getScore() + 3));
+        if (user == null) {
+            logger.warn("user on function updateUserScore is null");
+        } else {
+            if (isCorrect) {
+                int score = user.getScore();
+                int streak = user.getCorrectAnswerStreak();
+                user.setCorrectAnswerStreak(streak + 1);
+                // boost is basically double points for correct answer >=3 and triple on >=5 also win an power
+                if (user.getCorrectAnswerStreak() > 0) {
+                    obtainPower(user); //obtain power depending on streak
+                    if (streak >= 5) { //5+
+                        user.setScore(score + 3);
+                    } else if (streak >= 3) { //3-4
+                        user.setScore(score + 2);
+                    } else {
+                        user.setScore(score + 1);
+                    }
                 }
-                else if(user.getCorrectAnswerStreak() >=3 ) { //3-4
-                user.setScore(user.getScore() + 2);
-                }
-                else {
-                    user.setScore(user.getScore() + 1);
-                }
+            } else {
+                user.setCorrectAnswerStreak(0);
+                user.setItem("null");
             }
-            else {
-                user.setScore(user.getScore() + 1); //0-1-2
-            }
+            userRepository.save(user);
         }
-        else {
-            assert user != null;
-            user.setCorrectAnswerStreak(0);
-            user.setItem("null");
-        }
-        userRepository.save(user);
     }
 
     public void obtainPower(User user) {
