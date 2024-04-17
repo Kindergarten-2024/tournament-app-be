@@ -58,26 +58,26 @@ public class TaskRunner {
         if (round == 1) {
             List<Question> questions = IntStream.range(1, 11).mapToObj(questionService::getQuestionByOrder).toList();
             for (int i = 0; i < 10; i++) {
-                Instant taskAInstant = instant.plusSeconds(3 + (30 * i));
-                Instant taskBInstant = taskAInstant.plusSeconds(20);
+                Instant taskAInstant = instant.plusSeconds(3 + (35 * i));
+                Instant taskBInstant = taskAInstant.plusSeconds(25);
 
                 int finalI = i;
                 taskScheduler.schedule(() -> sendQuestion(finalI + 1, questions.get(finalI)), taskAInstant);
                 taskScheduler.schedule(this::sendLeaderboard, taskBInstant);
             }
-            Instant lastTaskBInstant = instant.plusSeconds(3 + (30 * 9)).plusSeconds(30);
+            Instant lastTaskBInstant = instant.plusSeconds(3 + (35 * 9)).plusSeconds(35);
             taskScheduler.schedule(this::updateRoundsAndTime, lastTaskBInstant);
         } else if (round == 2) {
             List<Question> questions = IntStream.range(11, 21).mapToObj(questionService::getQuestionByOrder).toList();
             for (int i = 0; i < 10; i++) {
-                Instant taskAInstant = instant.plusSeconds(3 + (30 * i));
-                Instant taskBInstant = taskAInstant.plusSeconds(20);
+                Instant taskAInstant = instant.plusSeconds(3 + (35 * i));
+                Instant taskBInstant = taskAInstant.plusSeconds(25);
 
                 int finalI = i;
                 taskScheduler.schedule(() -> sendQuestion(finalI + 1, questions.get(finalI)), taskAInstant);
                 taskScheduler.schedule(this::sendLeaderboard, taskBInstant);
             }
-            Instant lastTaskBInstant = instant.plusSeconds(3 + (30 * 9)).plusSeconds(30);
+            Instant lastTaskBInstant = instant.plusSeconds(3 + (35 * 9)).plusSeconds(35);
             taskScheduler.schedule(this::updateRoundsAndTime, lastTaskBInstant);
         } else {
             return;

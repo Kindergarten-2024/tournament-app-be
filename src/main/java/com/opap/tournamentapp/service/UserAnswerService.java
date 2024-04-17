@@ -47,7 +47,8 @@ public class UserAnswerService {
     @Transactional
     public void submitAnswer(Long userId, Long questionId, String answer) throws JsonProcessingException {
         Question question = questionRepository.findById(questionId).orElse(null);
-        User user = userRepository.findUserByUserId(userId);
+        User user = userRepository.findByIdWithLock(userId).orElse(null);
+//        User user = userRepository.findUserByUserId(userId);
 
         UserAnswer checkUserAnswer = userAnswerRepository.findByUserAndQuestion(user, question);
         if (checkUserAnswer == null) {
@@ -78,7 +79,7 @@ public class UserAnswerService {
      * @param user The user who responds.
      * @param isCorrect His answer is correct or wrong.
      */
-    @Transactional
+
      void updateUserScore(User user, boolean isCorrect) {
         if (user == null) {
             logger.warn("user on function updateUserScore is null");
@@ -107,6 +108,8 @@ public class UserAnswerService {
         }
     }
 
+
+
     public void obtainPower(User user) {
         if(user.getCorrectAnswerStreak() == 1) {
                 user.setItem("50-50");
@@ -120,8 +123,10 @@ public class UserAnswerService {
     }
 @Transactional
     public void usePower(Long userId, String item, Long enemyId) {
-        User user = userRepository.findUserByUserId(userId);
-        User enemy=userRepository.findUserByUserId(enemyId);
+//        User user = userRepository.findUserByUserId(userId);
+//        User enemy=userRepository.findUserByUserId(enemyId);
+        User user = userRepository.findByIdWithLock(userId).orElse(null);
+        User enemy = userRepository.findByIdWithLock(enemyId).orElse(null);
         logger.info(item);
         logger.info(user);
 
@@ -142,13 +147,13 @@ public class UserAnswerService {
                     //also sending leaderboard to update with new points
                     String destination = "/user/" + enemy.getUsername() + "/private";
                     String source = "/user/" + user.getUsername() + "/private";
-                    simpMessagingTemplate.convertAndSend(destination, user.getUsername() + " used mask power on you:" + stolenPointsInt);
-                    simpMessagingTemplate.convertAndSend(source, user.getUsername() + " using mask power:" + stolenPointsInt);
+                    simpMessagingTemplate.convertAndSend(destination, "mask " + user.getUsername() + " -points " + stolenPointsInt);
+                    simpMessagingTemplate.convertAndSend(source, "mask " + user.getUsername() + " +points " + stolenPointsInt);
                 }
                 else if(Objects.equals(item,"freeze") && enemy.getFreeze_debuff()<2){
                         String destination = "/user/" + enemy.getUsername() + "/private";
                         enemy.increaseFreezeDebuff();
-                        simpMessagingTemplate.convertAndSend(destination, "freeze:" + user.getUsername());
+                    simpMessagingTemplate.convertAndSend(destination, "freeze " + user.getUsername());
                         enemy.setDebuffAtm("freeze");
                         userRepository.save(enemy);
                     }
