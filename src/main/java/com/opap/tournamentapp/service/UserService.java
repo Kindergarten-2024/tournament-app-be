@@ -129,8 +129,8 @@ public class UserService {
         for (User user:users) {
             user.setFreeze_debuff(0);
             user.setMask_debuff(false);
-            userRepository.save(user);
         }
+        userRepository.saveAll(users);
     }
 
     public int totalRegistered(){
