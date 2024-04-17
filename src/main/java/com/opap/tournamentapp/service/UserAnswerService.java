@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +43,6 @@ public class UserAnswerService {
      * @param questionId The id of question answered.
      * @param answer The submitted answer of the user.
      */
-    @Transactional
     public void submitAnswer(Long userId, Long questionId, String answer) throws JsonProcessingException {
         Question question = questionRepository.findById(questionId).orElse(null);
         User user = userRepository.findByIdWithLock(userId).orElse(null);
@@ -121,7 +119,6 @@ public class UserAnswerService {
                 user.setItem("mask");
         }
     }
-@Transactional
     public void usePower(Long userId, String item, Long enemyId) {
 //        User user = userRepository.findUserByUserId(userId);
 //        User enemy=userRepository.findUserByUserId(enemyId);
