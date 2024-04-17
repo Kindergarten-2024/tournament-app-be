@@ -47,8 +47,7 @@ public class UserAnswerService {
     @Transactional
     public void submitAnswer(Long userId, Long questionId, String answer) throws JsonProcessingException {
         Question question = questionRepository.findById(questionId).orElse(null);
-        User user = userRepository.findByIdWithLock(userId).orElse(null);
-//        User user = userRepository.findUserByUserId(userId);
+        User user = userRepository.findUserByUserId(userId);
 
         UserAnswer checkUserAnswer = userAnswerRepository.findByUserAndQuestion(user, question);
         if (checkUserAnswer == null) {
@@ -123,10 +122,9 @@ public class UserAnswerService {
     }
 @Transactional
     public void usePower(Long userId, String item, Long enemyId) {
-//        User user = userRepository.findUserByUserId(userId);
-//        User enemy=userRepository.findUserByUserId(enemyId);
-        User user = userRepository.findByIdWithLock(userId).orElse(null);
-        User enemy = userRepository.findByIdWithLock(enemyId).orElse(null);
+        User user = userRepository.findUserByUserId(userId);
+        User enemy=userRepository.findUserByUserId(enemyId);
+
         logger.info(item);
         logger.info(user);
 

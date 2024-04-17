@@ -14,7 +14,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByOrderByScoreDesc();
     User findUserByUserId(Long userId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select u from User u where u.userId = :id")
-    Optional<User>findByIdWithLock(Long id);
+
 }
