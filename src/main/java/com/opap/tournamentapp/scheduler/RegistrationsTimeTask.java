@@ -46,14 +46,18 @@ public class RegistrationsTimeTask {
                 firebaseMessagingService.sendMessage("Round Starting", "Round starts in 1 minute");
                 messageSend = true;
             }
-            registrationsTimeService.setIsRegistrationsOpen(true);
+            if(!registrationsTimeService.isRegistrationsOpen()) {
+                registrationsTimeService.setIsRegistrationsOpen(true);
+            }
             firstTime = true;
             checkRegistrationsTimeDTO.setRegistrationsOpen(true);
             checkRegistrationsTimeDTO.setRounds(registrationsTimeService.getRegistrationRounds());
             checkRegistrationsTimeDTO.setRegistrationsEndTime(registrationsTimeService.getRegistrationsEndTime());
             simpMessagingTemplate.convertAndSend("/registrations-time", checkRegistrationsTimeDTO);
         } else {
-            registrationsTimeService.setIsRegistrationsOpen(false);
+            if(registrationsTimeService.isRegistrationsOpen()) {
+                registrationsTimeService.setIsRegistrationsOpen(false);
+            }
             checkRegistrationsTimeDTO.setRegistrationsOpen(false);
             checkRegistrationsTimeDTO.setRounds(registrationsTimeService.getRegistrationRounds());
             checkRegistrationsTimeDTO.setRegistrationsEndTime(registrationsTimeService.getRegistrationsEndTime());
