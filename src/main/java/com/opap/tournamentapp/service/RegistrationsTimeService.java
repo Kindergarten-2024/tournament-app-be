@@ -51,7 +51,7 @@ public class RegistrationsTimeService {
     public void setRegistrationRoundsAndNextQuizStartTime() {
         RegistrationsTime registrationsTime = registrationsTimeRepository.findFirstRecord();
         registrationsTime.setTournamentRound(registrationsTime.getTournamentRound() + 1);
-        registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(7));
+        registrationsTime.setRegistrationsEndTime(registrationsTime.getRegistrationsEndTime().plusMinutes(120));
         registrationsTimeRepository.save(registrationsTime);
         userService.resetFreezeAndMaskCooldown();
     }
